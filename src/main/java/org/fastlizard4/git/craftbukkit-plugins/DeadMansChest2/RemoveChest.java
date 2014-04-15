@@ -1,4 +1,4 @@
-package com.wesnc.playerchestdeath;
+package org.fastlizard4.git.craftbukkit-plugins.DeadMansChest2;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -10,13 +10,13 @@ import com.griefcraft.model.Protection;
 
 public class RemoveChest implements Runnable {
 	
-	ChestDeath plugin;
+	DeadMansChest2 plugin;
 	LinkedList<Block> changeblocks;
 	Block chestblock;
 	public Block chestblock2 = null;
 	int taskid = -1;
 
-	public RemoveChest(ChestDeath plugin, LinkedList<Block> changeblocks, Block chestblock, Block chestblock2) {
+	public RemoveChest(DeadMansChest2 plugin, LinkedList<Block> changeblocks, Block chestblock, Block chestblock2) {
 		this.plugin = plugin;
 		this.changeblocks = changeblocks;
 		this.chestblock = chestblock;
