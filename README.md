@@ -72,7 +72,7 @@ Downloading a build not marked as one of these is not recommended, as these
 may very well simply refuse to work and have not been tested *at all*!
 
 There is also a Jenkins job that handles mirroring of the Git repository from
-LizardNet Code Review to GitHub, and that can be found [jenkins-mirror][here].
+LizardNet Code Review to GitHub, and that can be found [here][jenkins-mirror].
 
 Licensing and Ackowledgements
 -----------------------------
