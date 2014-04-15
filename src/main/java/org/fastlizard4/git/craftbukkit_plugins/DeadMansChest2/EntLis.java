@@ -18,15 +18,15 @@ import org.bukkit.inventory.ItemStack;
 
 public class EntLis implements Listener {
 	public DeadMansChest2 plugin;
-	
+
 	public EntLis(DeadMansChest2 instance) {
 		plugin = instance;
 	}
-	
+
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onEntityDeath(EntityDeathEvent event) {
 		Entity entity = event.getEntity();
-		
+
 		if(entity instanceof Player) {
 			Player player = (Player)entity;
 			if(player.hasPermission("DeadMansChest2.chest")) {
@@ -59,7 +59,7 @@ public class EntLis implements Listener {
 				if(isempty) {
 					return;
 				}
-				
+
 				//Check to see if the player has chests in his inventory
 				//if he doesn't have the free chest permission.
 				boolean needschests = false;
@@ -98,7 +98,7 @@ public class EntLis implements Listener {
 						return;
 					}
 				}
-				
+
 				for(i = 0; i < items.size() && j < 27; i++)	{
 					ItemStack item = items.get(i);
 					if(item != null && item.getType() != Material.AIR) {
@@ -133,22 +133,22 @@ public class EntLis implements Listener {
 						}
 					}
 				}else if(needschests && chestcount > 1) {
-					//The player didn't have enough items to be in a double chest, 
+					//The player didn't have enough items to be in a double chest,
 					//so let's add the other chest if there is room.
 					addeditems.add(new ItemStack(Material.CHEST, 1));
 				}
-				
+
 				if(!this.plugin.drops && !player.hasPermission("DeadMansChest2.drops"))	{
 					event.getDrops().clear();
 				}
-				
+
 				if(this.plugin.deathMessage && player.hasPermission("DeadMansChest2.message")) {
 					this.plugin.getServer().broadcastMessage(ChatColor.RED + player.getDisplayName() + ChatColor.WHITE + " " + this.plugin.deathMessageString);
 				}
 
 				this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(this.plugin, new CreateChest(plugin, block, addeditems, player, doublechest), 1);
 			}
-	
+
 		}
 	}
 }

@@ -21,9 +21,9 @@ import com.griefcraft.lwc.*;
 
 public class DeadMansChest2 extends JavaPlugin
 {
-	
+
 	Logger logger = Logger.getLogger("Minecraft");
-	
+
 	public String mainDir = "plugins/DeadMansChest2/";
 	public File configFile = new File(mainDir+"Config.cfg");
 	public Properties prop = new Properties();
@@ -31,16 +31,16 @@ public class DeadMansChest2 extends JavaPlugin
 	public ConcurrentHashMap<Block, RemoveChest> deathchests = new ConcurrentHashMap<Block, RemoveChest>();
 
 	public LinkedList<Material> airblocks = new LinkedList<Material>();
-	
+
 	EntLis entityListener = new EntLis(this);
 
 	public LWC lwc = null;
-	
-	public String configFileHeader = 
+
+	public String configFileHeader =
 		"Edit this file as needed.\n" +
 		"Death Message must be true for the death message String to work!" +
 		"ChestDeleteInterval is in seconds.\n";
-	
+
 	public boolean drops = true;
 	public boolean mineabledrops = false;
 	public boolean deathMessage = true;
@@ -56,7 +56,7 @@ public class DeadMansChest2 extends JavaPlugin
 	public boolean ChestLoot = false;
 	public boolean needChestinInventory = false;
 	public String version = "0.5";
-	
+
 	public DeadMansChest2() {
 
 		airblocks.add(Material.AIR);
@@ -70,11 +70,11 @@ public class DeadMansChest2 extends JavaPlugin
 		airblocks.add(Material.LAVA);
 		airblocks.add(Material.STATIONARY_LAVA);
 	}
-	
+
 	@Override
 	public void onDisable()	{
 		logger.log(Level.INFO, "[DeadMansChest2] unloaded.");
-		
+
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public class DeadMansChest2 extends JavaPlugin
 		}
 		logger.log(Level.INFO, "[DeadMansChest2] loaded.");
 		new File(mainDir).mkdir();
-		
+
 		if(!configFile.exists()) {
 			updateIni();
 		}else {
@@ -100,7 +100,7 @@ public class DeadMansChest2 extends JavaPlugin
 		try	{
 			FileInputStream in = new FileInputStream(configFile);
 			prop.load(in);
-			
+
 			needChestinInventory = Boolean.parseBoolean(prop.getProperty("NeedChestInInventory", "false"));
 			drops = Boolean.parseBoolean(prop.getProperty("DropsEnabled", "true"));
 			deathMessage = Boolean.parseBoolean(prop.getProperty("DeathMessage", "true"));
@@ -124,14 +124,14 @@ public class DeadMansChest2 extends JavaPlugin
 			ChestDeleteIntervalEnabled = Boolean.parseBoolean(prop.getProperty("ChestDeleteIntervalEnabled", "true"));
 			ChestLoot = Boolean.parseBoolean(prop.getProperty("ChestLoot", "false"));
 			double sversion = Double.parseDouble(prop.getProperty("version", "0.4"));
-			
+
 			//Autmatically update the ini file here.
 			if(sversion < 0.8) {
 				updateIni();
 			}
 		}
 		catch(IOException ex) { }
-		
+
 	}
 
 	private void registerEvents() {
@@ -140,7 +140,7 @@ public class DeadMansChest2 extends JavaPlugin
 		pm.registerEvents(entityListener, this);
 		pm.registerEvents(bl, this);
 	}
-    
+
     private void updateIni() {
 		try {
 			BufferedWriter outChannel = new BufferedWriter(new FileWriter(configFile));
@@ -184,7 +184,7 @@ public class DeadMansChest2 extends JavaPlugin
 		} catch (Exception e) {
 			System.out.println("[DeadMansChest2] - file creation failed, using defaults.");
 		}
-		
+
 	}
 
 }

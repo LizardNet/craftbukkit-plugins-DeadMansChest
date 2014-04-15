@@ -9,7 +9,7 @@ import org.bukkit.block.Block;
 import com.griefcraft.model.Protection;
 
 public class RemoveChest implements Runnable {
-	
+
 	DeadMansChest2 plugin;
 	LinkedList<Block> changeblocks;
 	Block chestblock;
@@ -22,19 +22,19 @@ public class RemoveChest implements Runnable {
 		this.chestblock = chestblock;
 		this.chestblock2 = chestblock2;
 	}
-	
+
 	public void setTaskID(int id) {
 		taskid = id;
 	}
-	
+
 	public int getTaskID() {
 		return taskid;
 	}
-	
+
 	public void run() {
 		removeTheChest();
 	}
-	
+
 	public void removeTheChest() {
 		//A little fix to fix the pop off signs...
 		Iterator<Block> rblocks = changeblocks.descendingIterator();
@@ -46,12 +46,12 @@ public class RemoveChest implements Runnable {
 			}
 		}
 		if(chestblock != null && plugin.lwc != null) {
-			Protection protection = plugin.lwc.findProtection(chestblock); 
+			Protection protection = plugin.lwc.findProtection(chestblock);
 			if(protection != null) {
 				protection.remove();
 			}
 		}
 		plugin.deathchests.remove(chestblock);
 	}
-	
+
 }

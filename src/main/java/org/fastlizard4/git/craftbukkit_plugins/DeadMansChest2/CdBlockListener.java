@@ -18,9 +18,9 @@ import org.bukkit.inventory.PlayerInventory;
 import com.griefcraft.model.Protection;
 
 public class CdBlockListener implements Listener {
-	
+
 	DeadMansChest2 plugin;
-	
+
 	public CdBlockListener(DeadMansChest2 plugin) {
 		this.plugin = plugin;
 	}
@@ -71,7 +71,7 @@ public class CdBlockListener implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onBlockDamage (BlockDamageEvent event) {
 		if(!plugin.ChestLoot) {
@@ -96,7 +96,7 @@ public class CdBlockListener implements Listener {
 			}
 		}
 	}
-	
+
 	private void lootChest(Player player, Block chestblock) {
 		PlayerInventory pi = player.getInventory();
 		BlockState state = chestblock.getState();

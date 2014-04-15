@@ -15,14 +15,14 @@ import org.bukkit.inventory.ItemStack;
 import com.griefcraft.model.Protection.Type;
 
 public class CreateChest implements Runnable {
-	
+
 	DeadMansChest2 plugin;
 	Block chestblock;
 	Block chestblock2;
 	LinkedList<ItemStack> chestitems;
 	Player player;
 	boolean doublechest;
-	
+
 	public CreateChest(DeadMansChest2 plugin, Block chestblock, LinkedList<ItemStack> chestitems, Player player, boolean doublechest) {
 		this.plugin = plugin;
 		this.chestblock = chestblock;
@@ -68,7 +68,7 @@ public class CreateChest implements Runnable {
 				j++;
 			}
 		}
-		
+
 		if(plugin.LWC_Enabled && plugin.lwc != null && player.hasPermission("DeadMansChest2.lock")) {
 			int blockId = chest.getTypeId();
 			Type type = Type.PUBLIC;
@@ -78,7 +78,7 @@ public class CreateChest implements Runnable {
 			int x = chest.getX();
 			int y = chest.getY();
 			int z = chest.getZ();
-			
+
 			if(this.plugin.LWC_PrivateDefault) {
 				type = com.griefcraft.model.Protection.Type.PRIVATE;
 			}else {
@@ -87,7 +87,7 @@ public class CreateChest implements Runnable {
 			plugin.lwc.getPhysicalDatabase().registerProtection(blockId, type, world, owner, password, x, y, z);
 			//protectionblock = chestblock;
 		}
-		
+
 		if(this.plugin.SignOnChest)	{
 			boolean foundair = false;
 			BlockFace[] directions = {BlockFace.EAST,BlockFace.WEST,BlockFace.NORTH,BlockFace.SOUTH};
@@ -97,9 +97,9 @@ public class CreateChest implements Runnable {
 				if(plugin.LiquidReplace) {
 					//If we can replace water, let's do it with the sign too!
 					Block tempblock = chestblock.getRelative(directions[i]);
-					if(tempblock.getType() == Material.AIR|| tempblock.getType() == Material.WATER 
+					if(tempblock.getType() == Material.AIR|| tempblock.getType() == Material.WATER
 							|| tempblock.getType() == Material.STATIONARY_WATER
-							|| tempblock.getType() == Material.LAVA 
+							|| tempblock.getType() == Material.LAVA
 							|| tempblock.getType() == Material.STATIONARY_LAVA) {
 						signdirection = i;
 						foundair = true;
@@ -111,7 +111,7 @@ public class CreateChest implements Runnable {
 					}
 				}
 			}
-			
+
 			if(foundair) {
 				//-----------------------------------------------------------
 				Block signBlock = chestblock.getRelative(directions[signdirection]);
@@ -119,7 +119,7 @@ public class CreateChest implements Runnable {
 				BlockState signState = signBlock.getState();
 				Sign sign = (Sign)signState;
 				//-----------------------------------------------------------
-				
+
 				sign.setLine(0, player.getDisplayName()+"'s");
 				sign.setLine(1, "Deathpile");
 				sign.update();
@@ -137,7 +137,7 @@ public class CreateChest implements Runnable {
 					BlockState signState = signBlock.getState();
 					Sign sign = (Sign)signState;
 					//-----------------------------------------------------------
-					
+
 					sign.setLine(0, player.getDisplayName()+"'s");
 					sign.setLine(1, "Deathpile");
 					sign.update();
@@ -147,19 +147,19 @@ public class CreateChest implements Runnable {
 				}
 			}
 		}
-		
+
 		if(this.plugin.Sign_BeaconEnabled && player.hasPermission("DeadMansChest2.beacon"))	{
 			int height = this.plugin.Sign_BeaconHeight;
 			Location chestLocation1 = chestblock.getLocation();
-			
+
 			Location firstlocation = chestLocation1.add(0.0, 2.0, 0.0);
 			Block nextblock = firstlocation.getBlock();
-			
+
 			for(int i = 0; i < height; i++) {
 				if(plugin.LiquidReplace) {
-					if(nextblock.getType() == Material.AIR || nextblock.getType() == Material.WATER 
+					if(nextblock.getType() == Material.AIR || nextblock.getType() == Material.WATER
 							|| nextblock.getType() == Material.STATIONARY_WATER
-							|| nextblock.getType() == Material.LAVA 
+							|| nextblock.getType() == Material.LAVA
 							|| nextblock.getType() == Material.STATIONARY_LAVA ) {
 						nextblock.setType(Material.GLOWSTONE);
 						plugin.nodropblocks.add(nextblock);
@@ -175,7 +175,7 @@ public class CreateChest implements Runnable {
 				nextblock = nextblock.getRelative(BlockFace.UP);
 			}
 		}
-		
+
 		if(this.plugin.ChestDeleteIntervalEnabled && !player.hasPermission("DeadMansChest2.nodelete")) {
 			int delay = this.plugin.ChestDeleteInterval*20;
 			RemoveChest rc = new RemoveChest(plugin, changedblocks, chestblock, chestblock2);
@@ -184,7 +184,7 @@ public class CreateChest implements Runnable {
 				rc.setTaskID(taskid);
 				plugin.deathchests.put(chestblock, rc);
 			}
-			
+
 		}else {
 			RemoveChest rc = new RemoveChest(plugin, changedblocks, chestblock, chestblock2);
 			plugin.deathchests.put(chestblock, rc);
