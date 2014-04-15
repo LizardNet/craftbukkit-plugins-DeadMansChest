@@ -60,13 +60,13 @@ acquired at our Jenkins Continuous Integration server, specifically at
 them at the [Jenkins download page][jenkins-download], where builds are marked
 as follows:
 
-*Development (red star): Build reviewed by developers and confirmed to at least
- run, but may be extremely buggy and break in other ways.  Not recommended for
- use in production environments
-*Beta (orange star): Build tested to some degree, most obvious bugs already
- handled but some may be left.
-*Stable/recommended (green star): Build thoroughly tested by devs, recommended
- for use on production servers.
+* Development (red star): Build reviewed by developers and confirmed to at least
+  run, but may be extremely buggy and break in other ways.  Not recommended for
+  use in production environments
+* Beta (orange star): Build tested to some degree, most obvious bugs already
+  handled but some may be left.
+* Stable/recommended (green star): Build thoroughly tested by devs, recommended
+  for use on production servers.
 
 Downloading a build not marked as one of these is not recommended, as these
 may very well simply refuse to work and have not been tested *at all*!
@@ -76,15 +76,15 @@ LizardNet Code Review to GitHub, and that can be found [jenkins-mirror][here].
 
 Licensing and Ackowledgements
 -----------------------------
-**DEADMANSCHEST2**
+**DeadMansChest2**
 
 by Andrew "FastLizard4" Adams, TLUL, and the LizardNet CraftBukkit Plugins
 Development Team (see AUTHORS.txt file)
 
 BASED UPON:
-*DeadMansChest by Tux2, <https://github.com/Tux2/PlayerChestDeath>, GPL v3
-*(which was in turn based upon:)
-*PlayerChestDeath by Wesnc, <https://github.com/Wesnc/PlayerChestDeath>
+* DeadMansChest by Tux2, <https://github.com/Tux2/PlayerChestDeath>, GPL v3
+* *(which was in turn based upon:)*
+* PlayerChestDeath by Wesnc, <https://github.com/Wesnc/PlayerChestDeath>
 
 Copyright (C) 2013 by Andrew "FastLizard4" Adams, TLUL, and the LizardNet
 CraftBukkit Plugins Development Team. Some rights reserved.
@@ -96,12 +96,12 @@ or without modifications, is also licensed under the GNU GPL. (Although not
 required by the license, we also ask that you attribute us!) There is **NO
 WARRANTY FOR THIS SOFTWARE** to the extent permitted by law.
 
-	[BukkitDev]: http://dev.bukkit.org/bukkit-plugins/deadmanschest/
-	[lizardnet-repo]: https://git.fastlizard4.org/gitblit/summary/?r=craftbukkit-plugins/DeadMansChest.git
-	[gerrit]: https://gerrit.fastlizard4.org
-	[gerrit-repo]: https://gerrit.fastlizard4.org/r/gitweb?p=craftbukkit-plugins/DeadMansChest.git;a=summary
-	[github-repo]: https://github.com/LizardNet/craftbukkit-plugins-DeadMansChest
-	[jenkins-build]: https://integration.fastlizard4.org:444/jenkins/job/craftbukkit-plugins-DeadMansChest/
-	[jenkins-download]: https://integration.fastlizard4.org:444/jenkins/job/craftbukkit-plugins-DeadMansChest/promotion/
-	[jenkins-mirror]: https://integration.fastlizard4.org:444/jenkins/job/craftbukkit-plugins-DeadMansChest%20github%20mirror/
+[BukkitDev]: http://dev.bukkit.org/bukkit-plugins/deadmanschest/
+[lizardnet-repo]: https://git.fastlizard4.org/gitblit/summary/?r=craftbukkit-plugins/DeadMansChest.git
+[gerrit]: https://gerrit.fastlizard4.org
+[gerrit-repo]: https://gerrit.fastlizard4.org/r/gitweb?p=craftbukkit-plugins/DeadMansChest.git;a=summary
+[github-repo]: https://github.com/LizardNet/craftbukkit-plugins-DeadMansChest
+[jenkins-build]: https://integration.fastlizard4.org:444/jenkins/job/craftbukkit-plugins-DeadMansChest/
+[jenkins-download]: https://integration.fastlizard4.org:444/jenkins/job/craftbukkit-plugins-DeadMansChest/promotion/
+[jenkins-mirror]: https://integration.fastlizard4.org:444/jenkins/job/craftbukkit-plugins-DeadMansChest%20github%20mirror/
 	
