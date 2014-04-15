@@ -1,4 +1,4 @@
-package com.wesnc.playerchestdeath;
+package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -19,9 +19,9 @@ import com.griefcraft.model.Protection;
 
 public class CdBlockListener implements Listener {
 	
-	ChestDeath plugin;
+	DeadMansChest2 plugin;
 	
-	public CdBlockListener(ChestDeath plugin) {
+	public CdBlockListener(DeadMansChest2 plugin) {
 		this.plugin = plugin;
 	}
 
@@ -84,7 +84,7 @@ public class CdBlockListener implements Listener {
 				if(plugin.LWC_Enabled && plugin.lwc != null) {
 					Protection protection = plugin.lwc.findProtection(chestblock);
 					if(protection.getType() == com.griefcraft.model.Protection.Type.PRIVATE) {
-						if(protection.isOwner(player) || player.hasPermission("deadmanschest.loot")) {
+						if(protection.isOwner(player) || player.hasPermission("DeadMansChest2.loot")) {
 							lootChest(player, chestblock);
 						}
 					}else {
