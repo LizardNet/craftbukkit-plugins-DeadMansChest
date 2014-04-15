@@ -1,4 +1,4 @@
-package com.wesnc.playerchestdeath;
+package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
 import java.util.LinkedList;
 
@@ -16,14 +16,14 @@ import com.griefcraft.model.Protection.Type;
 
 public class CreateChest implements Runnable {
 	
-	ChestDeath plugin;
+	DeadMansChest2 plugin;
 	Block chestblock;
 	Block chestblock2;
 	LinkedList<ItemStack> chestitems;
 	Player player;
 	boolean doublechest;
 	
-	public CreateChest(ChestDeath plugin, Block chestblock, LinkedList<ItemStack> chestitems, Player player, boolean doublechest) {
+	public CreateChest(DeadMansChest2 plugin, Block chestblock, LinkedList<ItemStack> chestitems, Player player, boolean doublechest) {
 		this.plugin = plugin;
 		this.chestblock = chestblock;
 		this.chestitems = chestitems;
@@ -69,7 +69,7 @@ public class CreateChest implements Runnable {
 			}
 		}
 		
-		if(plugin.LWC_Enabled && plugin.lwc != null && player.hasPermission("deadmanschest.lock")) {
+		if(plugin.LWC_Enabled && plugin.lwc != null && player.hasPermission("DeadMansChest2.lock")) {
 			int blockId = chest.getTypeId();
 			Type type = Type.PUBLIC;
 			String world = chest.getWorld().getName();
@@ -148,7 +148,7 @@ public class CreateChest implements Runnable {
 			}
 		}
 		
-		if(this.plugin.Sign_BeaconEnabled && player.hasPermission("deadmanschest.beacon"))	{
+		if(this.plugin.Sign_BeaconEnabled && player.hasPermission("DeadMansChest2.beacon"))	{
 			int height = this.plugin.Sign_BeaconHeight;
 			Location chestLocation1 = chestblock.getLocation();
 			
@@ -176,7 +176,7 @@ public class CreateChest implements Runnable {
 			}
 		}
 		
-		if(this.plugin.ChestDeleteIntervalEnabled && !player.hasPermission("deadmanschest.nodelete")) {
+		if(this.plugin.ChestDeleteIntervalEnabled && !player.hasPermission("DeadMansChest2.nodelete")) {
 			int delay = this.plugin.ChestDeleteInterval*20;
 			RemoveChest rc = new RemoveChest(plugin, changedblocks, chestblock, chestblock2);
 			int taskid = this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(this.plugin, rc, delay);

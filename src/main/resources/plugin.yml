@@ -1,0 +1,52 @@
+name: DeadMansChest2
+main: org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2.DeadMansChest2
+version: 0.1
+softdepend: [LWC]
+
+# SuperPerms data
+permissions:
+    DeadMansChest2.player:
+        default: true
+        description: Gives access to all options, except for persistent chests and free chests.
+        children:
+            DeadMansChest2.chest: true
+            DeadMansChest2.drops: true
+            DeadMansChest2.message: true
+            DeadMansChest2.lock: true
+            DeadMansChest2.beacon: true
+            DeadMansChest2.doublechest: true
+    DeadMansChest2.admin:
+        default: op
+        description: Gives access to all options, including persistent chests and free chests.
+        children:
+            DeadMansChest2.player: true
+            DeadMansChest2.nodelete: true
+            DeadMansChest2.loot: true
+            DeadMansChest2.freechest: true
+    DeadMansChest2.chest:
+        description: Allows you to have a death chest.
+        default: true
+    DeadMansChest2.drops:
+        description: Allows anything that doesn't fit in the chest to drop naturally.
+        default: true
+    DeadMansChest2.message:
+        description: Announce this player's death.
+        default: true
+    DeadMansChest2.lock:
+        description: If LWC is enabled this player can get a locked chest.
+        default: true
+    DeadMansChest2.beacon:
+        description: Allows a beacon tower to be built for this player.
+        default: true
+    DeadMansChest2.nodelete:
+        description: Exempts this player's chests from being deleted.
+        default: op
+    DeadMansChest2.loot:
+        description: Allows you to loot a locked chest.
+        default: op
+    DeadMansChest2.doublechest:
+        description: Allows the player to have a double death chest.
+        default: op
+    DeadMansChest2.freechest:
+        description: If the player has this permission node then they don't need chests in their inventory to chest their items.
+        default: op

@@ -1,0 +1,86 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.fastlizard4.git.craftbukkit-plugins</groupId>
+  <artifactId>DeadMansChest2</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>DeadMansChest2</name>
+  <url>https://git.fastlizard4.org/gitblit/summary/?r=craftbukkit-plugins/DeadMansChest.git</url>
+
+    <repositories>
+        <repository>
+            <id>bukkit-repo</id>
+            <url>http://repo.bukkit.org/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>mcstats-repo</id>
+            <url>http://repo.mcstats.org/content/repositories/public</url>
+        </repository>
+    </repositories>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.bukkit</groupId>
+      <artifactId>bukkit</artifactId>
+      <version>1.7.5-R0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency> 
+      <groupId>com.griefcraft</groupId> 
+      <artifactId>lwc</artifactId>
+      <version>4.4.0-SNAPSHOT</version>
+        <exclusions>
+          <exclusion>
+            <groupId>*</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+        </exclusions>
+    </dependency>
+  </dependencies>
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>https://integration.fastlizard4.org</url>
+  </ciManagement>
+  <description>A CraftBukkit plugin that causes players to, upon death, drop a chest tile entity containing their inventory, as opposed to simply dropping their inventory as items.</description>
+  <inceptionYear>2014</inceptionYear>
+  <organization>
+    <name>LizardNet</name>
+    <url>https://fastlizard4.org/wiki/LizardNet</url>
+  </organization>
+  <scm>
+    <url>https://git.fastlizard4.org/gitblit/summary/?r=craftbukkit-plugins/DeadMansChest.git</url>
+  </scm>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.0</version>
+        <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+            </configuration>
+        
+      </plugin>
+    </plugins>
+  </build>
+
+  <distributionManagement>
+        <repository>
+            <id>lizardnet-integration</id>
+            <url>https://integration.fastlizard4.org:444/jenkins/plugin/repository/everything/</url>
+        </repository>
+  </distributionManagement>
+</project>
