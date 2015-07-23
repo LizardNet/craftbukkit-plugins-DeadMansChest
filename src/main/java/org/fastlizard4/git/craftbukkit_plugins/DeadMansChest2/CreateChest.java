@@ -129,7 +129,7 @@ public class CreateChest implements Runnable {
 
 		if(this.plugin.SignOnChest)	{
 			boolean foundair = false;
-			BlockFace[] directions = {BlockFace.EAST,BlockFace.WEST,BlockFace.NORTH,BlockFace.SOUTH};
+			BlockFace[] directions = {BlockFace.NORTH,BlockFace.EAST,BlockFace.SOUTH,BlockFace.WEST};
 			byte[] signbyte = {0x2,0x3,0x4,0x5};
 			int signdirection = 1;
 			for(int i = 0; i < directions.length && !foundair; i++) {
@@ -154,8 +154,10 @@ public class CreateChest implements Runnable {
 			if(foundair) {
 				//-----------------------------------------------------------
 				Block signBlock = chestblock.getRelative(directions[signdirection]);
-				signBlock.setTypeIdAndData(68, signbyte[signdirection], false);
 				BlockState signState = signBlock.getState();
+				org.bukkit.material.Sign matSign = new org.bukkit.material.Sign(Material.WALL_SIGN);
+				matSign.setFacingDirection(directions[(signdirection + 2) % 4]);
+				signState.setData(matSign);
 				Sign sign = (Sign)signState;
 				//-----------------------------------------------------------
 
