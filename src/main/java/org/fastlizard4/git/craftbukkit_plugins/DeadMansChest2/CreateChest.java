@@ -130,7 +130,6 @@ public class CreateChest implements Runnable {
 		if(this.plugin.SignOnChest)	{
 			boolean foundair = false;
 			BlockFace[] directions = {BlockFace.NORTH,BlockFace.EAST,BlockFace.SOUTH,BlockFace.WEST};
-			byte[] signbyte = {0x2,0x3,0x4,0x5};
 			int signdirection = 1;
 			for(int i = 0; i < directions.length && !foundair; i++) {
 				if(plugin.LiquidReplace) {
@@ -174,9 +173,8 @@ public class CreateChest implements Runnable {
 				Block signBlock = chestblock.getRelative(BlockFace.UP);
 				//Let's make sure we aren't overwriting a block here
 				if(plugin.airblocks.contains(signBlock.getType())) {
-					signBlock.setTypeIdAndData(63, signbyte[signdirection], false);
-					BlockState signState = signBlock.getState();
-					Sign sign = (Sign)signState;
+					signBlock.setType(Material.SIGN_POST);
+					Sign sign = (Sign)signBlock.getState();
 					//-----------------------------------------------------------
 
 					sign.setLine(0, player.getDisplayName()+"'s");
