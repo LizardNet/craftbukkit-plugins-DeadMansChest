@@ -8,7 +8,7 @@
  * (which was in turn based upon:)
  * PlayerChestDeath by Wesnc, <https://github.com/Wesnc/PlayerChestDeath>
 
- * Copyright (C) 2013 by Andrew "FastLizard4" Adams, TLUL, and the LizardNet
+ * Copyright (C) 2013-2015 by Andrew "FastLizard4" Adams, TLUL, and the LizardNet
  * CraftBukkit Plugins Development Team. Some rights reserved.
 
  * License GPLv3+: GNU General Public License version 3 or later (at your
