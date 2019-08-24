@@ -89,7 +89,7 @@ public class CreateChest implements Runnable
 			{
 				Block tempblock = chestblock.getRelative(direction[y]);
 				chestblock2 = tempblock;
-				if (plugin.airblocks.contains(tempblock.getType()))
+				if (Constants.AIR_BLOCKS.contains(tempblock.getType()))
 				{
 					tempblock.setType(Material.CHEST);
 					changedblocks.add(tempblock);
@@ -196,7 +196,7 @@ public class CreateChest implements Runnable
 				//-----------------------------------------------------------
 				Block signBlock = chestblock.getRelative(BlockFace.UP);
 				//Let's make sure we aren't overwriting a block here
-				if (plugin.airblocks.contains(signBlock.getType()))
+				if (Constants.AIR_BLOCKS.contains(signBlock.getType()))
 				{
 					signBlock.setType(Material.SIGN_POST);
 					Sign sign = (Sign)signBlock.getState();

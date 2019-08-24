@@ -50,27 +50,22 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.bukkit.Material;
+import com.griefcraft.lwc.LWC;
+import com.griefcraft.lwc.LWCPlugin;
 import org.bukkit.block.Block;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.griefcraft.lwc.*;
-
 public class DeadMansChest2 extends JavaPlugin
 {
 	private static final Logger logger = Logger.getLogger("Minecraft");
-
-	private static final String VERSION = "0.5";
 
 	private String mainDir = "plugins/DeadMansChest2/";
 	private File configFile = new File(mainDir + "Config.cfg");
 	private Properties prop = new Properties();
 	public LinkedList<Block> nodropblocks = new LinkedList<Block>();
 	public ConcurrentHashMap<Block, RemoveChest> deathchests = new ConcurrentHashMap<Block, RemoveChest>();
-
-	public LinkedList<Material> airblocks = new LinkedList<Material>();
 
 	private EntLis entityListener = new EntLis(this);
 
@@ -93,16 +88,6 @@ public class DeadMansChest2 extends JavaPlugin
 
 	public DeadMansChest2()
 	{
-		airblocks.add(Material.AIR);
-		//airblocks.add(Material.GRASS);
-		airblocks.add(Material.LONG_GRASS);
-		airblocks.add(Material.SNOW);
-		airblocks.add(Material.VINE);
-		airblocks.add(Material.WATER_LILY);
-		airblocks.add(Material.WATER);
-		airblocks.add(Material.STATIONARY_WATER);
-		airblocks.add(Material.LAVA);
-		airblocks.add(Material.STATIONARY_LAVA);
 	}
 
 	@Override
@@ -232,7 +217,7 @@ public class DeadMansChest2 extends JavaPlugin
 					"# or to loot any chest with lwc they need the DeadMansChest2.loot permission node.\n" +
 					"ChestLoot=" + ChestLoot + "\n\n" +
 					"#Do not change anything below this line unless you know what you are doing!\n" +
-					"version = " + VERSION);
+					"version = " + Constants.VERSION);
 			outChannel.close();
 		}
 		catch (Exception e)

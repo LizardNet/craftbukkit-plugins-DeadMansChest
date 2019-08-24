@@ -77,11 +77,11 @@ public class EntLis implements Listener
 				Location lastLoc = player.getLocation();
 				Block block = lastLoc.getBlock();
 				//See if the block we are on is a block we can safely write over...
-				if (!plugin.airblocks.contains(block.getType()))
+				if (!Constants.AIR_BLOCKS.contains(block.getType()))
 				{
 					//Must not be, let's go a block up and see if that one is free...
 					Block tempblock = block.getRelative(BlockFace.UP);
-					if (plugin.airblocks.contains(tempblock.getType()))
+					if (Constants.AIR_BLOCKS.contains(tempblock.getType()))
 					{
 						block = tempblock;
 					}
@@ -185,7 +185,7 @@ public class EntLis implements Listener
 					for (int y = 0; y < direction.length && noroom; y++)
 					{
 						Block tempblock = block.getRelative(direction[y]);
-						if (plugin.airblocks.contains(tempblock.getType()))
+						if (Constants.AIR_BLOCKS.contains(tempblock.getType()))
 						{
 							//we have an adjacent empty block, let's go ahead and add those items to another chest!
 							for (; i < items.size(); i++)
