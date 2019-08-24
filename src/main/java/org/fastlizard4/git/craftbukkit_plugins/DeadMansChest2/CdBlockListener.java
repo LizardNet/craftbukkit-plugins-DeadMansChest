@@ -39,7 +39,12 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
+import javax.annotation.Nullable;
+
+import com.griefcraft.lwc.LWC;
+import com.griefcraft.model.Protection;
 import org.bukkit.Material;
+import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
@@ -54,15 +59,20 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import com.griefcraft.model.Protection;
-
 public class CdBlockListener implements Listener
 {
-	private DeadMansChest2 plugin;
+	private Server server;
+	private Config config;
+	private Persistence persistence;
+	@Nullable
+	private LWC lwc;
 
-	public CdBlockListener(DeadMansChest2 plugin)
+	public CdBlockListener(Server server, Config config, Persistence persistence, @Nullable LWC lwc)
 	{
-		this.plugin = plugin;
+		this.server = server;
+		this.config = config;
+		this.persistence = persistence;
+		this.lwc = lwc;
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -70,24 +80,24 @@ public class CdBlockListener implements Listener
 	{
 		if (!event.isCancelled())
 		{
-			if (plugin.nodropblocks.contains(event.getBlock()))
+			if (persistence.nodropblocks.contains(event.getBlock()))
 			{
 				Block block = event.getBlock();
-				if (!plugin.mineabledrops)
+				if (!config.mineabledrops)
 				{
 					event.setCancelled(true);
 					if (block.getType() == Material.CHEST)
 					{
 						//This fixes the sign bug and removes the glowstone tower
 						//as well.
-						if (plugin.deathchests.containsKey(block))
+						if (persistence.deathchests.containsKey(block))
 						{
-							RemoveChest dcstuff = plugin.deathchests.get(block);
+							RemoveChest dcstuff = persistence.deathchests.get(block);
 							dcstuff.removeTheChest();
 							//cancel the removal task.
 							if (dcstuff.getTaskID() != -1)
 							{
-								plugin.getServer().getScheduler().cancelTask(dcstuff.getTaskID());
+								server.getScheduler().cancelTask(dcstuff.getTaskID());
 							}
 						}
 						else
@@ -100,7 +110,7 @@ public class CdBlockListener implements Listener
 						block.setType(Material.AIR);
 					}
 				}
-				plugin.nodropblocks.remove(block);
+				persistence.nodropblocks.remove(block);
 			}
 		}
 	}
@@ -110,7 +120,7 @@ public class CdBlockListener implements Listener
 	{
 		if (!event.isCancelled())
 		{
-			if (plugin.nodropblocks.contains(event.getBlock()) && !plugin.mineabledrops)
+			if (persistence.nodropblocks.contains(event.getBlock()) && !config.mineabledrops)
 			{
 				event.setCancelled(true);
 			}
@@ -122,7 +132,7 @@ public class CdBlockListener implements Listener
 	{
 		if (!event.isCancelled())
 		{
-			if (plugin.nodropblocks.contains(event.getBlock()) && !plugin.mineabledrops)
+			if (persistence.nodropblocks.contains(event.getBlock()) && !config.mineabledrops)
 			{
 				event.setCancelled(true);
 			}
@@ -132,7 +142,7 @@ public class CdBlockListener implements Listener
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onBlockDamage(BlockDamageEvent event)
 	{
-		if (!plugin.ChestLoot)
+		if (!config.ChestLoot)
 		{
 			return;
 		}
@@ -140,11 +150,11 @@ public class CdBlockListener implements Listener
 		Block chestblock = event.getBlock();
 		if (player.isSneaking() && chestblock.getType() == Material.CHEST)
 		{
-			if (plugin.deathchests.containsKey(event.getBlock()))
+			if (persistence.deathchests.containsKey(event.getBlock()))
 			{
-				if (plugin.LWC_Enabled && plugin.lwc != null)
+				if (config.LWC_Enabled && lwc != null)
 				{
-					Protection protection = plugin.lwc.findProtection(chestblock);
+					Protection protection = lwc.findProtection(chestblock);
 					if (protection.getType() == com.griefcraft.model.Protection.Type.PRIVATE)
 					{
 						if (protection.isOwner(player) || player.hasPermission("DeadMansChest2.loot"))
@@ -179,7 +189,7 @@ public class CdBlockListener implements Listener
 				chest.getInventory().removeItem(chestinventory[i]);
 			}
 		}
-		RemoveChest rc = plugin.deathchests.get(chestblock);
+		RemoveChest rc = persistence.deathchests.get(chestblock);
 		//Looting double chests requires more work...
 		if (rc.chestblock2 != null)
 		{
@@ -198,7 +208,7 @@ public class CdBlockListener implements Listener
 		rc.removeTheChest();
 		if (rc.getTaskID() != -1)
 		{
-			plugin.getServer().getScheduler().cancelTask(rc.getTaskID());
+			server.getScheduler().cancelTask(rc.getTaskID());
 		}
 	}
 }

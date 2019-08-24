@@ -39,78 +39,13 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
-import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.Nullable;
-
-import com.griefcraft.lwc.LWC;
-import com.griefcraft.model.Protection;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 
-public class RemoveChest implements Runnable
+public class Persistence
 {
-	private Persistence persistence;
-	@Nullable
-	private LWC lwc;
-
-	private LinkedList<Block> changeblocks;
-	private Block chestblock;
-	public Block chestblock2 = null;
-	private int taskid = -1;
-
-	public RemoveChest(
-			Persistence persistence,
-			@Nullable LWC lwc,
-			LinkedList<Block> changeblocks,
-			Block chestblock,
-			Block chestblock2
-	)
-	{
-		this.persistence = persistence;
-		this.lwc = lwc;
-		this.changeblocks = changeblocks;
-		this.chestblock = chestblock;
-		this.chestblock2 = chestblock2;
-	}
-
-	public void setTaskID(int id)
-	{
-		taskid = id;
-	}
-
-	public int getTaskID()
-	{
-		return taskid;
-	}
-
-	public void run()
-	{
-		removeTheChest();
-	}
-
-	public void removeTheChest()
-	{
-		//A little fix to fix the pop off signs...
-		Iterator<Block> rblocks = changeblocks.descendingIterator();
-		while (rblocks.hasNext())
-		{
-			Block tblock = rblocks.next();
-			if (persistence.nodropblocks.contains(tblock))
-			{
-				tblock.setType(Material.AIR);
-				persistence.nodropblocks.remove(tblock);
-			}
-		}
-		if (chestblock != null && lwc != null)
-		{
-			Protection protection = lwc.findProtection(chestblock);
-			if (protection != null)
-			{
-				protection.remove();
-			}
-		}
-		persistence.deathchests.remove(chestblock);
-	}
+	public LinkedList<Block> nodropblocks = new LinkedList<>();
+	public ConcurrentHashMap<Block, RemoveChest> deathchests = new ConcurrentHashMap<>();
 }

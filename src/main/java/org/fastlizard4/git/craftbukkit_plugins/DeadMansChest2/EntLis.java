@@ -42,9 +42,13 @@ package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
+import com.griefcraft.lwc.LWC;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -57,11 +61,26 @@ import org.bukkit.inventory.ItemStack;
 
 public class EntLis implements Listener
 {
-	private DeadMansChest2 plugin;
+	private Server server;
+	private Config config;
+	private Persistence persistence;
+	@Nullable
+	private LWC lwc;
+	private Scheduler scheduler;
 
-	public EntLis(DeadMansChest2 instance)
+	public EntLis(
+			Server server,
+			Config config,
+			Persistence persistence,
+			@Nullable LWC lwc,
+			Scheduler scheduler
+	)
 	{
-		plugin = instance;
+		this.server = server;
+		this.config = config;
+		this.persistence = persistence;
+		this.lwc = lwc;
+		this.scheduler = scheduler;
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -115,7 +134,7 @@ public class EntLis implements Listener
 				//if he doesn't have the free chest permission.
 				boolean needschests = false;
 				int chestcount = 0;
-				if (plugin.needChestinInventory && !player.hasPermission("DeadMansChest2.freechest"))
+				if (config.needChestinInventory && !player.hasPermission("DeadMansChest2.freechest"))
 				{
 					needschests = true;
 					for (i = 0; i < items.size(); i++)
@@ -213,17 +232,17 @@ public class EntLis implements Listener
 					addeditems.add(new ItemStack(Material.CHEST, 1));
 				}
 
-				if (!this.plugin.drops && !player.hasPermission("DeadMansChest2.drops"))
+				if (!config.drops && !player.hasPermission("DeadMansChest2.drops"))
 				{
 					event.getDrops().clear();
 				}
 
-				if (this.plugin.deathMessage && player.hasPermission("DeadMansChest2.message"))
+				if (config.deathMessage && player.hasPermission("DeadMansChest2.message"))
 				{
-					this.plugin.getServer().broadcastMessage(ChatColor.RED + player.getDisplayName() + ChatColor.WHITE + " " + this.plugin.deathMessageString);
+					this.server.broadcastMessage(ChatColor.RED + player.getDisplayName() + ChatColor.WHITE + " " + config.deathMessageString);
 				}
 
-				this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(this.plugin, new CreateChest(plugin, block, addeditems, player, doublechest), 1);
+				scheduler.schedule(new CreateChest(config, persistence, lwc, scheduler, block, addeditems, player, doublechest), 1);
 			}
 		}
 	}

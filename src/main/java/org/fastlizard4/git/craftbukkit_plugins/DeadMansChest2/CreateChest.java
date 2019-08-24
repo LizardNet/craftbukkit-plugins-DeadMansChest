@@ -41,6 +41,10 @@ package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
 import java.util.LinkedList;
 
+import javax.annotation.Nullable;
+
+import com.griefcraft.lwc.LWC;
+import com.griefcraft.model.Protection.Type;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -51,20 +55,35 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.griefcraft.model.Protection.Type;
-
 public class CreateChest implements Runnable
 {
-	private DeadMansChest2 plugin;
+	private Config config;
+	private Persistence persistence;
+	@Nullable
+	private LWC lwc;
+	private Scheduler scheduler;
+
 	private Block chestblock;
 	private Block chestblock2;
 	private LinkedList<ItemStack> chestitems;
 	private Player player;
 	private boolean doublechest;
 
-	public CreateChest(DeadMansChest2 plugin, Block chestblock, LinkedList<ItemStack> chestitems, Player player, boolean doublechest)
+	public CreateChest(
+			Config config,
+			Persistence persistence,
+			@Nullable LWC lwc,
+			Scheduler scheduler,
+			Block chestblock,
+			LinkedList<ItemStack> chestitems,
+			Player player,
+			boolean doublechest
+	)
 	{
-		this.plugin = plugin;
+		this.config = config;
+		this.persistence = persistence;
+		this.lwc = lwc;
+		this.scheduler = scheduler;
 		this.chestblock = chestblock;
 		this.chestitems = chestitems;
 		this.player = player;
@@ -77,7 +96,7 @@ public class CreateChest implements Runnable
 		LinkedList<Block> changedblocks = new LinkedList<Block>();
 		chestblock.setType(Material.CHEST);
 		changedblocks.add(chestblock);
-		plugin.nodropblocks.add(chestblock);
+		persistence.nodropblocks.add(chestblock);
 		BlockState state = chestblock.getState();
 		Chest chest = (Chest)state;
 		Chest chest2 = null;
@@ -93,7 +112,7 @@ public class CreateChest implements Runnable
 				{
 					tempblock.setType(Material.CHEST);
 					changedblocks.add(tempblock);
-					plugin.nodropblocks.add(tempblock);
+					persistence.nodropblocks.add(tempblock);
 					BlockState state2 = tempblock.getState();
 					chest2 = (Chest)state2;
 					noroom = false;
@@ -118,7 +137,7 @@ public class CreateChest implements Runnable
 			}
 		}
 
-		if (plugin.LWC_Enabled && plugin.lwc != null && player.hasPermission("DeadMansChest2.lock"))
+		if (config.LWC_Enabled && lwc != null && player.hasPermission("DeadMansChest2.lock"))
 		{
 			int blockId = chest.getTypeId();
 			Type type = Type.PUBLIC;
@@ -129,7 +148,7 @@ public class CreateChest implements Runnable
 			int y = chest.getY();
 			int z = chest.getZ();
 
-			if (this.plugin.LWC_PrivateDefault)
+			if (this.config.LWC_PrivateDefault)
 			{
 				type = com.griefcraft.model.Protection.Type.PRIVATE;
 			}
@@ -137,18 +156,18 @@ public class CreateChest implements Runnable
 			{
 				type = com.griefcraft.model.Protection.Type.PUBLIC;
 			}
-			plugin.lwc.getPhysicalDatabase().registerProtection(blockId, type, world, owner, password, x, y, z);
+			lwc.getPhysicalDatabase().registerProtection(blockId, type, world, owner, password, x, y, z);
 			//protectionblock = chestblock;
 		}
 
-		if (this.plugin.SignOnChest)
+		if (this.config.SignOnChest)
 		{
 			boolean foundair = false;
 			BlockFace[] directions = { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
 			int signdirection = 1;
 			for (int i = 0; i < directions.length && !foundair; i++)
 			{
-				if (plugin.LiquidReplace)
+				if (config.LiquidReplace)
 				{
 					//If we can replace water, let's do it with the sign too!
 					Block tempblock = chestblock.getRelative(directions[i]);
@@ -186,7 +205,7 @@ public class CreateChest implements Runnable
 				sign.setLine(1, "Deathpile");
 				sign.update();
 				changedblocks.add(signBlock);
-				plugin.nodropblocks.add(signBlock);
+				persistence.nodropblocks.add(signBlock);
 				//plugin.signblocks.put(chestblock, signBlock);
 			}
 			else
@@ -206,15 +225,15 @@ public class CreateChest implements Runnable
 					sign.setLine(1, "Deathpile");
 					sign.update();
 					changedblocks.add(signBlock);
-					plugin.nodropblocks.add(signBlock);
+					persistence.nodropblocks.add(signBlock);
 					//plugin.signblocks.put(chestblock, signBlock);
 				}
 			}
 		}
 
-		if (this.plugin.Sign_BeaconEnabled && player.hasPermission("DeadMansChest2.beacon"))
+		if (config.Sign_BeaconEnabled && player.hasPermission("DeadMansChest2.beacon"))
 		{
-			int height = this.plugin.Sign_BeaconHeight;
+			int height = config.Sign_BeaconHeight;
 			Location chestLocation1 = chestblock.getLocation();
 
 			Location firstlocation = chestLocation1.add(0.0, 2.0, 0.0);
@@ -222,7 +241,7 @@ public class CreateChest implements Runnable
 
 			for (int i = 0; i < height; i++)
 			{
-				if (plugin.LiquidReplace)
+				if (config.LiquidReplace)
 				{
 					if (nextblock.getType() == Material.AIR || nextblock.getType() == Material.WATER
 							|| nextblock.getType() == Material.STATIONARY_WATER
@@ -230,7 +249,7 @@ public class CreateChest implements Runnable
 							|| nextblock.getType() == Material.STATIONARY_LAVA)
 					{
 						nextblock.setType(Material.GLOWSTONE);
-						plugin.nodropblocks.add(nextblock);
+						persistence.nodropblocks.add(nextblock);
 						changedblocks.add(nextblock);
 					}
 				}
@@ -239,7 +258,7 @@ public class CreateChest implements Runnable
 					if (nextblock.getType() == Material.AIR)
 					{
 						nextblock.setType(Material.GLOWSTONE);
-						plugin.nodropblocks.add(nextblock);
+						persistence.nodropblocks.add(nextblock);
 						changedblocks.add(nextblock);
 					}
 				}
@@ -247,22 +266,22 @@ public class CreateChest implements Runnable
 			}
 		}
 
-		if (this.plugin.ChestDeleteIntervalEnabled && !player.hasPermission("DeadMansChest2.nodelete"))
+		if (config.ChestDeleteIntervalEnabled && !player.hasPermission("DeadMansChest2.nodelete"))
 		{
-			int delay = this.plugin.ChestDeleteInterval * 20;
-			RemoveChest rc = new RemoveChest(plugin, changedblocks, chestblock, chestblock2);
-			int taskid = this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(this.plugin, rc, delay);
+			int delay = config.ChestDeleteInterval * 20;
+			RemoveChest rc = new RemoveChest(persistence, lwc, changedblocks, chestblock, chestblock2);
+			int taskid = scheduler.schedule(rc, delay);
 			if (taskid != -1)
 			{
 				rc.setTaskID(taskid);
-				plugin.deathchests.put(chestblock, rc);
+				persistence.deathchests.put(chestblock, rc);
 			}
 
 		}
 		else
 		{
-			RemoveChest rc = new RemoveChest(plugin, changedblocks, chestblock, chestblock2);
-			plugin.deathchests.put(chestblock, rc);
+			RemoveChest rc = new RemoveChest(persistence, lwc, changedblocks, chestblock, chestblock2);
+			persistence.deathchests.put(chestblock, rc);
 		}
 	}
 }
