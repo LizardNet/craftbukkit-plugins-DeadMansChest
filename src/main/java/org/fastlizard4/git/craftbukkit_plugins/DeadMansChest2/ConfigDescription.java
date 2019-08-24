@@ -39,28 +39,14 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
-import java.util.Set;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import com.google.common.collect.ImmutableSet;
-import org.bukkit.Material;
-
-public final class Constants
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ConfigDescription
 {
-	public static final String VERSION = "0.8";
-	public static final Set<Material> AIR_BLOCKS = ImmutableSet.of(
-			Material.AIR,
-			Material.LONG_GRASS,
-			Material.SNOW,
-			Material.VINE,
-			Material.WATER_LILY,
-			Material.WATER,
-			Material.STATIONARY_WATER,
-			Material.LAVA,
-			Material.STATIONARY_LAVA
-	);
-
-	private Constants()
-	{
-		throw new IllegalStateException();
-	}
+	String value();
 }

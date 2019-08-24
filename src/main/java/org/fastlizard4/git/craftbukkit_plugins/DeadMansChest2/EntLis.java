@@ -134,7 +134,7 @@ public class EntLis implements Listener
 				//if he doesn't have the free chest permission.
 				boolean needschests = false;
 				int chestcount = 0;
-				if (config.isNeedChestinInventory() && !player.hasPermission("DeadMansChest2.freechest"))
+				if (config.isNeedChestInInventory() && !player.hasPermission("DeadMansChest2.freechest"))
 				{
 					needschests = true;
 					for (i = 0; i < items.size(); i++)
@@ -232,7 +232,7 @@ public class EntLis implements Listener
 					addeditems.add(new ItemStack(Material.CHEST, 1));
 				}
 
-				if (!config.isDrops() && !player.hasPermission("DeadMansChest2.drops"))
+				if (!config.isDropsEnabled() && !player.hasPermission("DeadMansChest2.drops"))
 				{
 					event.getDrops().clear();
 				}

@@ -137,7 +137,7 @@ public class CreateChest implements Runnable
 			}
 		}
 
-		if (config.isLWC_Enabled() && lwc != null && player.hasPermission("DeadMansChest2.lock"))
+		if (config.isLWCEnabled() && lwc != null && player.hasPermission("DeadMansChest2.lock"))
 		{
 			int blockId = chest.getTypeId();
 			Type type = Type.PUBLIC;
@@ -148,7 +148,7 @@ public class CreateChest implements Runnable
 			int y = chest.getY();
 			int z = chest.getZ();
 
-			if (this.config.isLWC_PrivateDefault())
+			if (this.config.isLWCPrivateDefault())
 			{
 				type = com.griefcraft.model.Protection.Type.PRIVATE;
 			}
@@ -167,7 +167,7 @@ public class CreateChest implements Runnable
 			int signdirection = 1;
 			for (int i = 0; i < directions.length && !foundair; i++)
 			{
-				if (config.isLiquidReplace())
+				if (config.isBeaconReplacesLiquid())
 				{
 					//If we can replace water, let's do it with the sign too!
 					Block tempblock = chestblock.getRelative(directions[i]);
@@ -231,9 +231,9 @@ public class CreateChest implements Runnable
 			}
 		}
 
-		if (config.isSign_BeaconEnabled() && player.hasPermission("DeadMansChest2.beacon"))
+		if (config.isBeaconEnabled() && player.hasPermission("DeadMansChest2.beacon"))
 		{
-			int height = config.getSign_BeaconHeight();
+			int height = config.getBeaconHeight();
 			Location chestLocation1 = chestblock.getLocation();
 
 			Location firstlocation = chestLocation1.add(0.0, 2.0, 0.0);
@@ -241,7 +241,7 @@ public class CreateChest implements Runnable
 
 			for (int i = 0; i < height; i++)
 			{
-				if (config.isLiquidReplace())
+				if (config.isBeaconReplacesLiquid())
 				{
 					if (nextblock.getType() == Material.AIR || nextblock.getType() == Material.WATER
 							|| nextblock.getType() == Material.STATIONARY_WATER

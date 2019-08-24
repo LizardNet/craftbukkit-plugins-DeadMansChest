@@ -83,7 +83,7 @@ public class CdBlockListener implements Listener
 			if (persistence.nodropblocks.contains(event.getBlock()))
 			{
 				Block block = event.getBlock();
-				if (!config.isMineabledrops())
+				if (!config.isMineableDrops())
 				{
 					event.setCancelled(true);
 					if (block.getType() == Material.CHEST)
@@ -120,7 +120,7 @@ public class CdBlockListener implements Listener
 	{
 		if (!event.isCancelled())
 		{
-			if (persistence.nodropblocks.contains(event.getBlock()) && !config.isMineabledrops())
+			if (persistence.nodropblocks.contains(event.getBlock()) && !config.isMineableDrops())
 			{
 				event.setCancelled(true);
 			}
@@ -132,7 +132,7 @@ public class CdBlockListener implements Listener
 	{
 		if (!event.isCancelled())
 		{
-			if (persistence.nodropblocks.contains(event.getBlock()) && !config.isMineabledrops())
+			if (persistence.nodropblocks.contains(event.getBlock()) && !config.isMineableDrops())
 			{
 				event.setCancelled(true);
 			}
@@ -152,7 +152,7 @@ public class CdBlockListener implements Listener
 		{
 			if (persistence.deathchests.containsKey(event.getBlock()))
 			{
-				if (config.isLWC_Enabled() && lwc != null)
+				if (config.isLWCEnabled() && lwc != null)
 				{
 					Protection protection = lwc.findProtection(chestblock);
 					if (protection.getType() == com.griefcraft.model.Protection.Type.PRIVATE)
