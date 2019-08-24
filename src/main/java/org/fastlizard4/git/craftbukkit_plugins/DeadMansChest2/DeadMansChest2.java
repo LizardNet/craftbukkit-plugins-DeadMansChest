@@ -2,40 +2,40 @@
  * DEADMANSCHEST2
  * by Andrew "FastLizard4" Adams, TLUL, and the LizardNet CraftBukkit Plugins
  * Development Team (see AUTHORS.txt file)
-
+ *
  * BASED UPON:
  * DeadMansChest by Tux2, <https://github.com/Tux2/PlayerChestDeath>, GPL v3
  * (which was in turn based upon:)
  * PlayerChestDeath by Wesnc, <https://github.com/Wesnc/PlayerChestDeath>
-
- * Copyright (C) 2013-2015 by Andrew "FastLizard4" Adams, TLUL, and the LizardNet
+ *
+ * Copyright (C) 2013-2019 by Andrew "FastLizard4" Adams, TLUL, and the LizardNet
  * CraftBukkit Plugins Development Team. Some rights reserved.
-
+ *
  * License GPLv3+: GNU General Public License version 3 or later (at your
  * choice): <http://gnu.org/licenses/gpl.html>. This is free software: you are
  * free to change and redistribute it at your will provided that your
  * redistribution, with or without modifications, is also licensed under the GNU
  * GPL. (Although not required by the license, we also ask that you attribute
  * us!) There is NO WARRANTY FOR THIS SOFTWARE to the extent permitted by law.
-
+ *
  * This is an open source project. The source Git repositories, which you are
  * welcome to contribute to, can be found here:
  * <https://gerrit.fastlizard4.org/r/gitweb?p=craftbukkit-plugins/DeadMansChest.git;a=summary>
  * <https://git.fastlizard4.org/gitblit/summary/?r=craftbukkit-plugins/DeadMansChest.git>
-
+ *
  * Gerrit Code Review for the project:
  * <https://gerrit.fastlizard4.org/r/#/q/project:craftbukkit-plugins/DeadMansChest,n,z>
-
+ *
  * Continuous Integration for this project:
  * <https://integration.fastlizard4.org:444/jenkins/job/craftbukkit-plugins-DeadMansChest/>
-
+ *
  * Alternatively, the project source code can be found on the PUBLISH-ONLY
  * mirror on GitHub:
  * <https://github.com/LizardNet/craftbukkit-plugins-DeadMansChest>
-
+ *
  * Note: Pull requests and patches submitted to GitHub will be transferred by a
  * developer to Gerrit before they are acted upon.
-*/
+ */
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
@@ -60,25 +60,21 @@ import com.griefcraft.lwc.*;
 
 public class DeadMansChest2 extends JavaPlugin
 {
+	private static final Logger logger = Logger.getLogger("Minecraft");
 
-	Logger logger = Logger.getLogger("Minecraft");
+	private static final String VERSION = "0.5";
 
-	public String mainDir = "plugins/DeadMansChest2/";
-	public File configFile = new File(mainDir+"Config.cfg");
-	public Properties prop = new Properties();
+	private String mainDir = "plugins/DeadMansChest2/";
+	private File configFile = new File(mainDir + "Config.cfg");
+	private Properties prop = new Properties();
 	public LinkedList<Block> nodropblocks = new LinkedList<Block>();
 	public ConcurrentHashMap<Block, RemoveChest> deathchests = new ConcurrentHashMap<Block, RemoveChest>();
 
 	public LinkedList<Material> airblocks = new LinkedList<Material>();
 
-	EntLis entityListener = new EntLis(this);
+	private EntLis entityListener = new EntLis(this);
 
 	public LWC lwc = null;
-
-	public String configFileHeader =
-		"Edit this file as needed.\n" +
-		"Death Message must be true for the death message String to work!" +
-		"ChestDeleteInterval is in seconds.\n";
 
 	public boolean drops = true;
 	public boolean mineabledrops = false;
@@ -86,7 +82,7 @@ public class DeadMansChest2 extends JavaPlugin
 	public String deathMessageString = "died. Deploying death chest.";
 	public boolean SignOnChest = true;
 	public boolean LWC_Enabled = true;
-	public boolean LWC_PrivateDefault =true;
+	public boolean LWC_PrivateDefault = true;
 	public boolean Sign_BeaconEnabled = true;
 	public int Sign_BeaconHeight = 10;
 	public boolean LiquidReplace = true;
@@ -94,10 +90,9 @@ public class DeadMansChest2 extends JavaPlugin
 	public boolean ChestDeleteIntervalEnabled = true;
 	public boolean ChestLoot = false;
 	public boolean needChestinInventory = false;
-	public String version = "0.5";
 
-	public DeadMansChest2() {
-
+	public DeadMansChest2()
+	{
 		airblocks.add(Material.AIR);
 		//airblocks.add(Material.GRASS);
 		airblocks.add(Material.LONG_GRASS);
@@ -111,32 +106,40 @@ public class DeadMansChest2 extends JavaPlugin
 	}
 
 	@Override
-	public void onDisable()	{
+	public void onDisable()
+	{
 		logger.log(Level.INFO, "[DeadMansChest2] unloaded.");
 
 	}
 
 	@Override
-	public void onEnable() {
+	public void onEnable()
+	{
 		Plugin lwcPlugin = getServer().getPluginManager().getPlugin("LWC");
-		if(lwcPlugin != null) {
+		if (lwcPlugin != null)
+		{
 			System.out.println("[DeadMansChest2] LWC plugin found!");
-		    lwc = ((LWCPlugin) lwcPlugin).getLWC();
+			lwc = ((LWCPlugin)lwcPlugin).getLWC();
 		}
 		logger.log(Level.INFO, "[DeadMansChest2] loaded.");
 		new File(mainDir).mkdir();
 
-		if(!configFile.exists()) {
+		if (!configFile.exists())
+		{
 			updateIni();
-		}else {
+		}
+		else
+		{
 			loadConfig();
 		}
 
 		registerEvents();
 	}
 
-	private void loadConfig() {
-		try	{
+	private void loadConfig()
+	{
+		try
+		{
 			FileInputStream in = new FileInputStream(configFile);
 			prop.load(in);
 
@@ -148,16 +151,22 @@ public class DeadMansChest2 extends JavaPlugin
 			LWC_Enabled = Boolean.parseBoolean(prop.getProperty("LWCEnabled", "true"));
 			LWC_PrivateDefault = Boolean.parseBoolean(prop.getProperty("LWCPrivateDefault", "true"));
 			Sign_BeaconEnabled = Boolean.parseBoolean(prop.getProperty("BeaconEnabled", "true"));
-			try{
+			try
+			{
 				Sign_BeaconHeight = Integer.parseInt(prop.getProperty("BeaconHeight", "10"));
-			}catch (NumberFormatException e) {
+			}
+			catch (NumberFormatException e)
+			{
 				System.out.println("[DeadMansChest2] Couldn't process BeaconHeight, using default");
 			}
 			LiquidReplace = Boolean.parseBoolean(prop.getProperty("BeaconReplacesLiquid", "true"));
 			mineabledrops = Boolean.parseBoolean(prop.getProperty("MineableDrops", "false"));
-			try{
+			try
+			{
 				ChestDeleteInterval = Integer.parseInt(prop.getProperty("ChestDeleteInterval", "80"));
-			}catch (NumberFormatException e) {
+			}
+			catch (NumberFormatException e)
+			{
 				System.out.println("[DeadMansChest2] Couldn't process ChestDeleteInterval, using default");
 			}
 			ChestDeleteIntervalEnabled = Boolean.parseBoolean(prop.getProperty("ChestDeleteIntervalEnabled", "true"));
@@ -165,23 +174,28 @@ public class DeadMansChest2 extends JavaPlugin
 			double sversion = Double.parseDouble(prop.getProperty("version", "0.4"));
 
 			//Autmatically update the ini file here.
-			if(sversion < 0.8) {
+			if (sversion < 0.8)
+			{
 				updateIni();
 			}
 		}
-		catch(IOException ex) { }
-
+		catch (IOException ex)
+		{
+		}
 	}
 
-	private void registerEvents() {
+	private void registerEvents()
+	{
 		PluginManager pm = getServer().getPluginManager();
 		CdBlockListener bl = new CdBlockListener(this);
 		pm.registerEvents(entityListener, this);
 		pm.registerEvents(bl, this);
 	}
 
-    private void updateIni() {
-		try {
+	private void updateIni()
+	{
+		try
+		{
 			BufferedWriter outChannel = new BufferedWriter(new FileWriter(configFile));
 			outChannel.write("#This is the main DeadMansChest2 config file\n" +
 					"#Death Message must be true for the death message String to work!\n" +
@@ -218,12 +232,12 @@ public class DeadMansChest2 extends JavaPlugin
 					"# or to loot any chest with lwc they need the DeadMansChest2.loot permission node.\n" +
 					"ChestLoot=" + ChestLoot + "\n\n" +
 					"#Do not change anything below this line unless you know what you are doing!\n" +
-					"version = " + version );
+					"version = " + VERSION);
 			outChannel.close();
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			System.out.println("[DeadMansChest2] - file creation failed, using defaults.");
 		}
-
 	}
-
 }
