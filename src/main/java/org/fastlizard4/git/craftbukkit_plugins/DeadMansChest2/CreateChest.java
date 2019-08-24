@@ -137,7 +137,7 @@ public class CreateChest implements Runnable
 			}
 		}
 
-		if (config.LWC_Enabled && lwc != null && player.hasPermission("DeadMansChest2.lock"))
+		if (config.isLWC_Enabled() && lwc != null && player.hasPermission("DeadMansChest2.lock"))
 		{
 			int blockId = chest.getTypeId();
 			Type type = Type.PUBLIC;
@@ -148,7 +148,7 @@ public class CreateChest implements Runnable
 			int y = chest.getY();
 			int z = chest.getZ();
 
-			if (this.config.LWC_PrivateDefault)
+			if (this.config.isLWC_PrivateDefault())
 			{
 				type = com.griefcraft.model.Protection.Type.PRIVATE;
 			}
@@ -160,14 +160,14 @@ public class CreateChest implements Runnable
 			//protectionblock = chestblock;
 		}
 
-		if (this.config.SignOnChest)
+		if (this.config.isSignOnChest())
 		{
 			boolean foundair = false;
 			BlockFace[] directions = { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
 			int signdirection = 1;
 			for (int i = 0; i < directions.length && !foundair; i++)
 			{
-				if (config.LiquidReplace)
+				if (config.isLiquidReplace())
 				{
 					//If we can replace water, let's do it with the sign too!
 					Block tempblock = chestblock.getRelative(directions[i]);
@@ -231,9 +231,9 @@ public class CreateChest implements Runnable
 			}
 		}
 
-		if (config.Sign_BeaconEnabled && player.hasPermission("DeadMansChest2.beacon"))
+		if (config.isSign_BeaconEnabled() && player.hasPermission("DeadMansChest2.beacon"))
 		{
-			int height = config.Sign_BeaconHeight;
+			int height = config.getSign_BeaconHeight();
 			Location chestLocation1 = chestblock.getLocation();
 
 			Location firstlocation = chestLocation1.add(0.0, 2.0, 0.0);
@@ -241,7 +241,7 @@ public class CreateChest implements Runnable
 
 			for (int i = 0; i < height; i++)
 			{
-				if (config.LiquidReplace)
+				if (config.isLiquidReplace())
 				{
 					if (nextblock.getType() == Material.AIR || nextblock.getType() == Material.WATER
 							|| nextblock.getType() == Material.STATIONARY_WATER
@@ -266,9 +266,9 @@ public class CreateChest implements Runnable
 			}
 		}
 
-		if (config.ChestDeleteIntervalEnabled && !player.hasPermission("DeadMansChest2.nodelete"))
+		if (config.isChestDeleteIntervalEnabled() && !player.hasPermission("DeadMansChest2.nodelete"))
 		{
-			int delay = config.ChestDeleteInterval * 20;
+			int delay = config.getChestDeleteInterval() * 20;
 			RemoveChest rc = new RemoveChest(persistence, lwc, changedblocks, chestblock, chestblock2);
 			int taskid = scheduler.schedule(rc, delay);
 			if (taskid != -1)

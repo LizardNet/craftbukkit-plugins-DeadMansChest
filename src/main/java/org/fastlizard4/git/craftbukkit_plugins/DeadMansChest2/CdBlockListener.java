@@ -83,7 +83,7 @@ public class CdBlockListener implements Listener
 			if (persistence.nodropblocks.contains(event.getBlock()))
 			{
 				Block block = event.getBlock();
-				if (!config.mineabledrops)
+				if (!config.isMineabledrops())
 				{
 					event.setCancelled(true);
 					if (block.getType() == Material.CHEST)
@@ -120,7 +120,7 @@ public class CdBlockListener implements Listener
 	{
 		if (!event.isCancelled())
 		{
-			if (persistence.nodropblocks.contains(event.getBlock()) && !config.mineabledrops)
+			if (persistence.nodropblocks.contains(event.getBlock()) && !config.isMineabledrops())
 			{
 				event.setCancelled(true);
 			}
@@ -132,7 +132,7 @@ public class CdBlockListener implements Listener
 	{
 		if (!event.isCancelled())
 		{
-			if (persistence.nodropblocks.contains(event.getBlock()) && !config.mineabledrops)
+			if (persistence.nodropblocks.contains(event.getBlock()) && !config.isMineabledrops())
 			{
 				event.setCancelled(true);
 			}
@@ -142,7 +142,7 @@ public class CdBlockListener implements Listener
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onBlockDamage(BlockDamageEvent event)
 	{
-		if (!config.ChestLoot)
+		if (!config.isChestLoot())
 		{
 			return;
 		}
@@ -152,7 +152,7 @@ public class CdBlockListener implements Listener
 		{
 			if (persistence.deathchests.containsKey(event.getBlock()))
 			{
-				if (config.LWC_Enabled && lwc != null)
+				if (config.isLWC_Enabled() && lwc != null)
 				{
 					Protection protection = lwc.findProtection(chestblock);
 					if (protection.getType() == com.griefcraft.model.Protection.Type.PRIVATE)

@@ -48,20 +48,20 @@ import java.util.Properties;
 
 public class Config
 {
-	public boolean drops = true;
-	public boolean mineabledrops = false;
-	public boolean deathMessage = true;
-	public String deathMessageString = "died. Deploying death chest.";
-	public boolean SignOnChest = true;
-	public boolean LWC_Enabled = true;
-	public boolean LWC_PrivateDefault = true;
-	public boolean Sign_BeaconEnabled = true;
-	public int Sign_BeaconHeight = 10;
-	public boolean LiquidReplace = true;
-	public int ChestDeleteInterval = 80;
-	public boolean ChestDeleteIntervalEnabled = true;
-	public boolean ChestLoot = false;
-	public boolean needChestinInventory = false;
+	private boolean drops = true;
+	private boolean mineabledrops = false;
+	private boolean deathMessage = true;
+	private String deathMessageString = "died. Deploying death chest.";
+	private boolean SignOnChest = true;
+	private boolean LWC_Enabled = true;
+	private boolean LWC_PrivateDefault = true;
+	private boolean Sign_BeaconEnabled = true;
+	private int Sign_BeaconHeight = 10;
+	private boolean LiquidReplace = true;
+	private int ChestDeleteInterval = 80;
+	private boolean ChestDeleteIntervalEnabled = true;
+	private boolean ChestLoot = false;
+	private boolean needChestinInventory = false;
 
 	public void load(File configFile) throws IOException
 	{
@@ -154,5 +154,145 @@ public class Config
 					"#Do not change anything below this line unless you know what you are doing!\n" +
 					"version = " + Constants.VERSION);
 		}
+	}
+
+	public boolean isDrops()
+	{
+		return drops;
+	}
+
+	public void setDrops(boolean drops)
+	{
+		this.drops = drops;
+	}
+
+	public boolean isMineabledrops()
+	{
+		return mineabledrops;
+	}
+
+	public void setMineabledrops(boolean mineabledrops)
+	{
+		this.mineabledrops = mineabledrops;
+	}
+
+	public boolean isDeathMessage()
+	{
+		return deathMessage;
+	}
+
+	public void setDeathMessage(boolean deathMessage)
+	{
+		this.deathMessage = deathMessage;
+	}
+
+	public String getDeathMessageString()
+	{
+		return deathMessageString;
+	}
+
+	public void setDeathMessageString(String deathMessageString)
+	{
+		this.deathMessageString = deathMessageString;
+	}
+
+	public boolean isSignOnChest()
+	{
+		return SignOnChest;
+	}
+
+	public void setSignOnChest(boolean signOnChest)
+	{
+		SignOnChest = signOnChest;
+	}
+
+	public boolean isLWC_Enabled()
+	{
+		return LWC_Enabled;
+	}
+
+	public void setLWC_Enabled(boolean LWC_Enabled)
+	{
+		this.LWC_Enabled = LWC_Enabled;
+	}
+
+	public boolean isLWC_PrivateDefault()
+	{
+		return LWC_PrivateDefault;
+	}
+
+	public void setLWC_PrivateDefault(boolean LWC_PrivateDefault)
+	{
+		this.LWC_PrivateDefault = LWC_PrivateDefault;
+	}
+
+	public boolean isSign_BeaconEnabled()
+	{
+		return Sign_BeaconEnabled;
+	}
+
+	public void setSign_BeaconEnabled(boolean sign_BeaconEnabled)
+	{
+		Sign_BeaconEnabled = sign_BeaconEnabled;
+	}
+
+	public int getSign_BeaconHeight()
+	{
+		return Sign_BeaconHeight;
+	}
+
+	public void setSign_BeaconHeight(int sign_BeaconHeight)
+	{
+		Sign_BeaconHeight = sign_BeaconHeight;
+	}
+
+	public boolean isLiquidReplace()
+	{
+		return LiquidReplace;
+	}
+
+	public void setLiquidReplace(boolean liquidReplace)
+	{
+		LiquidReplace = liquidReplace;
+	}
+
+	public int getChestDeleteInterval()
+	{
+		return ChestDeleteInterval;
+	}
+
+	public void setChestDeleteInterval(int chestDeleteInterval)
+	{
+		ChestDeleteInterval = chestDeleteInterval;
+	}
+
+	public boolean isChestDeleteIntervalEnabled()
+	{
+		return ChestDeleteIntervalEnabled;
+	}
+
+	public void setChestDeleteIntervalEnabled(boolean chestDeleteIntervalEnabled)
+	{
+		ChestDeleteIntervalEnabled = chestDeleteIntervalEnabled;
+	}
+
+	public boolean isChestLoot()
+	{
+		return ChestLoot;
+	}
+
+	public void setChestLoot(boolean chestLoot)
+	{
+		ChestLoot = chestLoot;
+	}
+
+	public boolean isNeedChestinInventory()
+	{
+		return needChestinInventory;
+	}
+
+	public void setNeedChestinInventory(boolean needChestinInventory)
+	{
+		this.needChestinInventory = needChestinInventory;
 	}
 }
