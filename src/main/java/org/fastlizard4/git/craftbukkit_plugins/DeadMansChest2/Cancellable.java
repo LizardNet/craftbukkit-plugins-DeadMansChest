@@ -39,53 +39,8 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
-import javax.annotation.Nullable;
-
-import com.griefcraft.lwc.LWC;
-
-public class RemoveChest implements Runnable
+@FunctionalInterface
+public interface Cancellable
 {
-	private Persistence persistence;
-	@Nullable
-	private LWC lwc;
-
-	private DeathChest deathChest;
-	private int taskid = -1;
-
-	public RemoveChest(
-			Persistence persistence,
-			@Nullable LWC lwc,
-			DeathChest deathChest
-	)
-	{
-		this.persistence = persistence;
-		this.lwc = lwc;
-		this.deathChest = deathChest;
-	}
-
-	public DeathChest getDeathChest()
-	{
-		return deathChest;
-	}
-
-	public void setTaskID(int taskid)
-	{
-		this.taskid = taskid;
-	}
-
-	public int getTaskID()
-	{
-		return taskid;
-	}
-
-	public void run()
-	{
-		removeTheChest();
-	}
-
-	public void removeTheChest()
-	{
-		deathChest.removeAll();
-		persistence.unregisterDeathChest(deathChest);
-	}
+	void cancel();
 }

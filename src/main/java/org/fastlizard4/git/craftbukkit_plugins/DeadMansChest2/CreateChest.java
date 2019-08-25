@@ -106,7 +106,7 @@ public class CreateChest implements Runnable
 		}
 		Chest chest = (Chest)chestblock.getState();
 		Chest chest2 = chestblock2 != null ? (Chest)chestblock2.getState() : null;
-		DeathChest deathChest = new DeathChest(config, chestblock, chestblock2);
+		DeathChest deathChest = new DeathChest(config, persistence, chestblock, chestblock2);
 
 		int j = 0;
 		for (ItemStack item : chestitems)
@@ -230,19 +230,7 @@ public class CreateChest implements Runnable
 		if (config.isChestDeleteIntervalEnabled() && !player.hasPermission("DeadMansChest2.nodelete"))
 		{
 			int delay = config.getChestDeleteInterval() * 20;
-			RemoveChest rc = new RemoveChest(persistence, lwc, deathChest);
-			int taskid = scheduler.schedule(rc, delay);
-			if (taskid != -1)
-			{
-				rc.setTaskID(taskid);
-				persistence.registerDeathChest(deathChest, rc);
-			}
-
-		}
-		else
-		{
-			RemoveChest rc = new RemoveChest(persistence, lwc, deathChest);
-			persistence.registerDeathChest(deathChest, rc);
+			deathChest.scheduleRemoval(scheduler, delay);
 		}
 	}
 }

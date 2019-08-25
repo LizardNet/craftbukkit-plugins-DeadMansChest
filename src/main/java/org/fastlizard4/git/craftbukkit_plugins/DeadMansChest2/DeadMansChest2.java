@@ -50,6 +50,7 @@ import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 public class DeadMansChest2 extends JavaPlugin
 {
@@ -96,9 +97,12 @@ public class DeadMansChest2 extends JavaPlugin
 		}
 
 		Server server = getServer();
-		Scheduler scheduler = (task, delay) ->
-				getServer().getScheduler().scheduleSyncDelayedTask(DeadMansChest2.this, task, delay);
 		Persistence persistence = new Persistence();
+		Scheduler scheduler = (task, delay) -> {
+			BukkitScheduler bukkitScheduler = server.getScheduler();
+			int taskId = bukkitScheduler.scheduleSyncDelayedTask(DeadMansChest2.this, task, delay);
+			return () -> bukkitScheduler.cancelTask(taskId);
+		};
 
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(new EntLis(server, configuration, persistence, lwc, scheduler), this);

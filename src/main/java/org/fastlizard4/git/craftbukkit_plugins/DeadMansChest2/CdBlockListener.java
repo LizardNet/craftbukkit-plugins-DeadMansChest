@@ -86,29 +86,7 @@ public class CdBlockListener implements Listener
 				if (!config.isMineableDrops())
 				{
 					event.setCancelled(true);
-					if (block.getType() == Material.CHEST)
-					{
-						//This fixes the sign bug and removes the glowstone tower
-						//as well.
-						if (persistence.isDeathChest(block))
-						{
-							RemoveChest dcstuff = persistence.getRemovalHook(block);
-							dcstuff.removeTheChest();
-							//cancel the removal task.
-							if (dcstuff.getTaskID() != -1)
-							{
-								server.getScheduler().cancelTask(dcstuff.getTaskID());
-							}
-						}
-						else
-						{
-							block.setType(Material.AIR);
-						}
-					}
-					else
-					{
-						block.setType(Material.AIR);
-					}
+					block.setType(Material.AIR);
 				}
 				persistence.unregisterFakeBlock(block);
 			}
@@ -189,9 +167,9 @@ public class CdBlockListener implements Listener
 				chest.getInventory().removeItem(chestinventory[i]);
 			}
 		}
-		RemoveChest rc = persistence.getRemovalHook(chestblock);
 		//Looting double chests requires more work...
-		Block chest2 = rc.getDeathChest().getSecondChest();
+		DeathChest deathChest = persistence.getDeathChest(chestblock);
+		Block chest2 = deathChest.getSecondChest();
 		if (chest2 != null)
 		{
 			state = chest2.getState();
@@ -206,10 +184,6 @@ public class CdBlockListener implements Listener
 				}
 			}
 		}
-		rc.removeTheChest();
-		if (rc.getTaskID() != -1)
-		{
-			server.getScheduler().cancelTask(rc.getTaskID());
-		}
+		deathChest.removeAll();
 	}
 }

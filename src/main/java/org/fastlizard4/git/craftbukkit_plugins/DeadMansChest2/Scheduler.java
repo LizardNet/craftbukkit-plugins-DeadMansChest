@@ -42,5 +42,5 @@ package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 @FunctionalInterface
 public interface Scheduler
 {
-	int schedule(Runnable task, long delay);
+	Cancellable schedule(Runnable task, long delay);
 }

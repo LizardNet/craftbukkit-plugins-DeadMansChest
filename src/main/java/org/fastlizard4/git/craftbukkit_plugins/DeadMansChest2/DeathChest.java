@@ -52,16 +52,19 @@ import org.bukkit.block.Block;
 public class DeathChest
 {
 	private final Config config;
+	private final Persistence persistence;
 	private final Block chest;
 	@Nullable
 	private final Block secondChest;
 	private final List<Block> blocks = new ArrayList<>();
 	@Nullable
 	private LWC lwc;
+	private Cancellable removalTask;
 
-	public DeathChest(Config config, Block chest, @Nullable Block secondChest)
+	public DeathChest(Config config, Persistence persistence, Block chest, @Nullable Block secondChest)
 	{
 		this.config = config;
+		this.persistence = persistence;
 		this.chest = chest;
 		setBlock(chest, Material.CHEST);
 		this.secondChest = secondChest;
@@ -95,6 +98,11 @@ public class DeathChest
 
 	public void removeBlock(Block block)
 	{
+		if (block.equals(chest))
+		{
+			removeAll();
+			return;
+		}
 		if (blocks.contains(block))
 		{
 			block.setType(Material.AIR);
@@ -114,6 +122,8 @@ public class DeathChest
 			blocks.get(i).setType(Material.AIR);
 		}
 		blocks.clear();
+		persistence.unregisterDeathChest(this);
+		removalTask.cancel();
 	}
 
 	public void lock(LWC lwc, String playerName)
@@ -123,5 +133,10 @@ public class DeathChest
 				config.isLWCPrivateDefault() ? Protection.Type.PRIVATE : Protection.Type.PUBLIC,
 				chest.getWorld().getName(), playerName, "",
 				chest.getX(), chest.getY(), chest.getZ());
+	}
+
+	public void scheduleRemoval(Scheduler scheduler, long delay)
+	{
+		removalTask = scheduler.schedule(this::removeAll, delay);
 	}
 }

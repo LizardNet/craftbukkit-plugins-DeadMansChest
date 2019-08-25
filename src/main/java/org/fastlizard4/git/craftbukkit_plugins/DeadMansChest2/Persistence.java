@@ -39,6 +39,7 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,7 +48,11 @@ import org.bukkit.block.Block;
 public class Persistence
 {
 	private Map<Block, DeathChest> deathChests = new ConcurrentHashMap<>();
-	private Map<DeathChest, RemoveChest> removalHooks = new ConcurrentHashMap<>();
+
+	public DeathChest getDeathChest(Block block)
+	{
+		return deathChests.get(block);
+	}
 
 	public void unregisterFakeBlock(Block block)
 	{
@@ -56,15 +61,10 @@ public class Persistence
 			DeathChest deathChest = deathChests.get(block);
 			deathChest.removeAll();
 			deathChests.remove(block);
-			RemoveChest removeChest = removalHooks.remove(deathChest);
-			if (removeChest != null)
-			{
-				// cancel?
-			}
 			return;
 		}
 
-		for (DeathChest deathChest : removalHooks.keySet())
+		for (DeathChest deathChest : listDeathChests())
 		{
 			deathChest.removeBlock(block);
 		}
@@ -72,20 +72,13 @@ public class Persistence
 
 	public boolean isFakeBlock(Block block)
 	{
-		return removalHooks.keySet().stream()
+		return listDeathChests().stream()
 				.anyMatch(chest -> chest.containsBlock(block));
-	}
-
-	public void registerDeathChest(DeathChest chest, RemoveChest removalHook)
-	{
-		deathChests.put(chest.getChest(), chest);
-		removalHooks.put(chest, removalHook);
 	}
 
 	public void unregisterDeathChest(DeathChest chest)
 	{
 		deathChests.remove(chest.getChest());
-		removalHooks.remove(chest);
 	}
 
 	public boolean isDeathChest(Block block)
@@ -93,9 +86,8 @@ public class Persistence
 		return deathChests.containsKey(block);
 	}
 
-	public RemoveChest getRemovalHook(Block block)
+	private Collection<DeathChest> listDeathChests()
 	{
-		DeathChest chest = deathChests.get(block);
-		return chest != null ? removalHooks.get(chest) : null;
+		return deathChests.values();
 	}
 }
