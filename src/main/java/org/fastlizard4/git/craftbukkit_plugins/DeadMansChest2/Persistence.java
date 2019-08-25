@@ -56,14 +56,6 @@ public class Persistence
 
 	public void unregisterFakeBlock(Block block)
 	{
-		if (deathChests.containsKey(block))
-		{
-			DeathChest deathChest = deathChests.get(block);
-			deathChest.removeAll();
-			deathChests.remove(block);
-			return;
-		}
-
 		for (DeathChest deathChest : listDeathChests())
 		{
 			deathChest.removeBlock(block);
