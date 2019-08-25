@@ -39,63 +39,89 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.annotation.Nullable;
+
+import com.griefcraft.lwc.LWC;
+import com.griefcraft.model.Protection;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 
-public class Persistence
+public class DeathChest
 {
-	private Map<Block, DeathChest> deathChests = new ConcurrentHashMap<>();
-	private Map<DeathChest, RemoveChest> removalHooks = new ConcurrentHashMap<>();
+	private final Config config;
+	private final Block chest;
+	@Nullable
+	private final Block secondChest;
+	private final List<Block> blocks = new ArrayList<>();
+	@Nullable
+	private LWC lwc;
 
-	public void unregisterFakeBlock(Block block)
+	public DeathChest(Config config, Block chest, @Nullable Block secondChest)
 	{
-		if (deathChests.containsKey(block))
+		this.config = config;
+		this.chest = chest;
+		setBlock(chest, Material.CHEST);
+		this.secondChest = secondChest;
+		if (secondChest != null)
 		{
-			DeathChest deathChest = deathChests.get(block);
-			deathChest.removeAll();
-			deathChests.remove(block);
-			RemoveChest removeChest = removalHooks.remove(deathChest);
-			if (removeChest != null)
-			{
-				// cancel?
-			}
-			return;
-		}
-
-		for (DeathChest deathChest : removalHooks.keySet())
-		{
-			deathChest.removeBlock(block);
+			setBlock(secondChest, Material.CHEST);
 		}
 	}
 
-	public boolean isFakeBlock(Block block)
+	public Block getChest()
 	{
-		return removalHooks.keySet().stream()
-				.anyMatch(chest -> chest.containsBlock(block));
+		return chest;
 	}
 
-	public void registerDeathChest(DeathChest chest, RemoveChest removalHook)
+	@Nullable
+	public Block getSecondChest()
 	{
-		deathChests.put(chest.getChest(), chest);
-		removalHooks.put(chest, removalHook);
+		return secondChest;
 	}
 
-	public void unregisterDeathChest(DeathChest chest)
+	public void setBlock(Block block, Material material)
 	{
-		deathChests.remove(chest.getChest());
-		removalHooks.remove(chest);
+		blocks.add(block);
+		block.setType(material);
 	}
 
-	public boolean isDeathChest(Block block)
+	public boolean containsBlock(Block block)
 	{
-		return deathChests.containsKey(block);
+		return blocks.contains(block);
 	}
 
-	public RemoveChest getRemovalHook(Block block)
+	public void removeBlock(Block block)
 	{
-		DeathChest chest = deathChests.get(block);
-		return chest != null ? removalHooks.get(chest) : null;
+		if (blocks.contains(block))
+		{
+			block.setType(Material.AIR);
+			blocks.remove(block);
+		}
+	}
+
+	public void removeAll()
+	{
+		Protection protection = lwc.findProtection(chest);
+		if (protection != null)
+		{
+			protection.remove();
+		}
+		for (int i = blocks.size() - 1; i >= 0; i--)
+		{
+			blocks.get(i).setType(Material.AIR);
+		}
+		blocks.clear();
+	}
+
+	public void lock(LWC lwc, String playerName)
+	{
+		this.lwc = lwc;
+		lwc.getPhysicalDatabase().registerProtection(chest.getTypeId(),
+				config.isLWCPrivateDefault() ? Protection.Type.PRIVATE : Protection.Type.PUBLIC,
+				chest.getWorld().getName(), playerName, "",
+				chest.getX(), chest.getY(), chest.getZ());
 	}
 }

@@ -44,12 +44,10 @@ import java.util.LinkedList;
 import javax.annotation.Nullable;
 
 import com.griefcraft.lwc.LWC;
-import com.griefcraft.model.Protection.Type;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -93,33 +91,23 @@ public class CreateChest implements Runnable
 	@Override
 	public void run()
 	{
-		LinkedList<Block> changedblocks = new LinkedList<Block>();
-		chestblock.setType(Material.CHEST);
-		changedblocks.add(chestblock);
-		persistence.registerFakeBlock(chestblock);
-		BlockState state = chestblock.getState();
-		Chest chest = (Chest)state;
-		Chest chest2 = null;
 		if (doublechest)
 		{
 			BlockFace[] direction = { BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH };
-			boolean noroom = true;
-			for (int y = 0; y < direction.length && noroom; y++)
+			for (int y = 0; y < direction.length; y++)
 			{
 				Block tempblock = chestblock.getRelative(direction[y]);
-				chestblock2 = tempblock;
 				if (Constants.AIR_BLOCKS.contains(tempblock.getType()))
 				{
-					tempblock.setType(Material.CHEST);
-					changedblocks.add(tempblock);
-					persistence.registerFakeBlock(tempblock);
-					BlockState state2 = tempblock.getState();
-					chest2 = (Chest)state2;
-					noroom = false;
+					chestblock2 = tempblock;
+					break;
 				}
 			}
 		}
-		//Block protectionblock = null;
+		Chest chest = (Chest)chestblock.getState();
+		Chest chest2 = chestblock2 != null ? (Chest)chestblock2.getState() : null;
+		DeathChest deathChest = new DeathChest(config, chestblock, chestblock2);
+
 		int j = 0;
 		for (ItemStack item : chestitems)
 		{
@@ -139,25 +127,7 @@ public class CreateChest implements Runnable
 
 		if (config.isLWCEnabled() && lwc != null && player.hasPermission("DeadMansChest2.lock"))
 		{
-			int blockId = chest.getTypeId();
-			Type type = Type.PUBLIC;
-			String world = chest.getWorld().getName();
-			String owner = player.getName();
-			String password = "";
-			int x = chest.getX();
-			int y = chest.getY();
-			int z = chest.getZ();
-
-			if (this.config.isLWCPrivateDefault())
-			{
-				type = com.griefcraft.model.Protection.Type.PRIVATE;
-			}
-			else
-			{
-				type = com.griefcraft.model.Protection.Type.PUBLIC;
-			}
-			lwc.getPhysicalDatabase().registerProtection(blockId, type, world, owner, password, x, y, z);
-			//protectionblock = chestblock;
+			deathChest.lock(lwc, player.getName());
 		}
 
 		if (this.config.isSignOnChest())
@@ -194,7 +164,7 @@ public class CreateChest implements Runnable
 			{
 				//-----------------------------------------------------------
 				Block signBlock = chestblock.getRelative(directions[signdirection]);
-				signBlock.setType(Material.WALL_SIGN);
+				deathChest.setBlock(signBlock, Material.WALL_SIGN);
 				Sign sign = (Sign)signBlock.getState();
 				org.bukkit.material.Sign matSign = new org.bukkit.material.Sign(Material.WALL_SIGN);
 				matSign.setFacingDirection(directions[signdirection]);
@@ -204,9 +174,6 @@ public class CreateChest implements Runnable
 				sign.setLine(0, player.getDisplayName() + "'s");
 				sign.setLine(1, "Deathpile");
 				sign.update();
-				changedblocks.add(signBlock);
-				persistence.registerFakeBlock(signBlock);
-				//plugin.signblocks.put(chestblock, signBlock);
 			}
 			else
 			{
@@ -217,15 +184,13 @@ public class CreateChest implements Runnable
 				//Let's make sure we aren't overwriting a block here
 				if (Constants.AIR_BLOCKS.contains(signBlock.getType()))
 				{
-					signBlock.setType(Material.SIGN_POST);
+					deathChest.setBlock(signBlock, Material.SIGN_POST);
 					Sign sign = (Sign)signBlock.getState();
 					//-----------------------------------------------------------
 
 					sign.setLine(0, player.getDisplayName() + "'s");
 					sign.setLine(1, "Deathpile");
 					sign.update();
-					changedblocks.add(signBlock);
-					persistence.registerFakeBlock(signBlock);
 					//plugin.signblocks.put(chestblock, signBlock);
 				}
 			}
@@ -248,18 +213,14 @@ public class CreateChest implements Runnable
 							|| nextblock.getType() == Material.LAVA
 							|| nextblock.getType() == Material.STATIONARY_LAVA)
 					{
-						nextblock.setType(Material.GLOWSTONE);
-						persistence.registerFakeBlock(nextblock);
-						changedblocks.add(nextblock);
+						deathChest.setBlock(nextblock, Material.GLOWSTONE);
 					}
 				}
 				else
 				{
 					if (nextblock.getType() == Material.AIR)
 					{
-						nextblock.setType(Material.GLOWSTONE);
-						persistence.registerFakeBlock(nextblock);
-						changedblocks.add(nextblock);
+						deathChest.setBlock(nextblock, Material.GLOWSTONE);
 					}
 				}
 				nextblock = nextblock.getRelative(BlockFace.UP);
@@ -269,19 +230,19 @@ public class CreateChest implements Runnable
 		if (config.isChestDeleteIntervalEnabled() && !player.hasPermission("DeadMansChest2.nodelete"))
 		{
 			int delay = config.getChestDeleteInterval() * 20;
-			RemoveChest rc = new RemoveChest(persistence, lwc, changedblocks, chestblock, chestblock2);
+			RemoveChest rc = new RemoveChest(persistence, lwc, deathChest);
 			int taskid = scheduler.schedule(rc, delay);
 			if (taskid != -1)
 			{
 				rc.setTaskID(taskid);
-				persistence.registerDeathChest(chestblock, rc);
+				persistence.registerDeathChest(deathChest, rc);
 			}
 
 		}
 		else
 		{
-			RemoveChest rc = new RemoveChest(persistence, lwc, changedblocks, chestblock, chestblock2);
-			persistence.registerDeathChest(chestblock, rc);
+			RemoveChest rc = new RemoveChest(persistence, lwc, deathChest);
+			persistence.registerDeathChest(deathChest, rc);
 		}
 	}
 }

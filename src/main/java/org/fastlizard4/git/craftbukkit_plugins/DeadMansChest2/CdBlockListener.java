@@ -191,9 +191,10 @@ public class CdBlockListener implements Listener
 		}
 		RemoveChest rc = persistence.getRemovalHook(chestblock);
 		//Looting double chests requires more work...
-		if (rc.chestblock2 != null)
+		Block chest2 = rc.getDeathChest().getSecondChest();
+		if (chest2 != null)
 		{
-			state = rc.chestblock2.getState();
+			state = chest2.getState();
 			chest = (Chest)state;
 			chestinventory = chest.getInventory().getContents();
 			for (int i = 0; i < chestinventory.length && pi.firstEmpty() != -1; i++)

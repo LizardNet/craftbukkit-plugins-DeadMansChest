@@ -39,15 +39,9 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-
 import javax.annotation.Nullable;
 
 import com.griefcraft.lwc.LWC;
-import com.griefcraft.model.Protection;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 
 public class RemoveChest implements Runnable
 {
@@ -55,29 +49,28 @@ public class RemoveChest implements Runnable
 	@Nullable
 	private LWC lwc;
 
-	private LinkedList<Block> changeblocks;
-	private Block chestblock;
-	public Block chestblock2 = null;
+	private DeathChest deathChest;
 	private int taskid = -1;
 
 	public RemoveChest(
 			Persistence persistence,
 			@Nullable LWC lwc,
-			LinkedList<Block> changeblocks,
-			Block chestblock,
-			Block chestblock2
+			DeathChest deathChest
 	)
 	{
 		this.persistence = persistence;
 		this.lwc = lwc;
-		this.changeblocks = changeblocks;
-		this.chestblock = chestblock;
-		this.chestblock2 = chestblock2;
+		this.deathChest = deathChest;
 	}
 
-	public void setTaskID(int id)
+	public DeathChest getDeathChest()
 	{
-		taskid = id;
+		return deathChest;
+	}
+
+	public void setTaskID(int taskid)
+	{
+		this.taskid = taskid;
 	}
 
 	public int getTaskID()
@@ -92,25 +85,7 @@ public class RemoveChest implements Runnable
 
 	public void removeTheChest()
 	{
-		//A little fix to fix the pop off signs...
-		Iterator<Block> rblocks = changeblocks.descendingIterator();
-		while (rblocks.hasNext())
-		{
-			Block tblock = rblocks.next();
-			if (persistence.isFakeBlock(tblock))
-			{
-				tblock.setType(Material.AIR);
-				persistence.unregisterFakeBlock(tblock);
-			}
-		}
-		if (chestblock != null && lwc != null)
-		{
-			Protection protection = lwc.findProtection(chestblock);
-			if (protection != null)
-			{
-				protection.remove();
-			}
-		}
-		persistence.unregisterDeathChest(chestblock);
+		deathChest.removeAll();
+		persistence.unregisterDeathChest(deathChest);
 	}
 }
