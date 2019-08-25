@@ -46,8 +46,6 @@ import com.griefcraft.model.Protection;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -56,7 +54,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 public class CdBlockListener implements Listener
@@ -156,34 +153,6 @@ public class CdBlockListener implements Listener
 	private void lootChest(Player player, Block chestblock)
 	{
 		PlayerInventory pi = player.getInventory();
-		BlockState state = chestblock.getState();
-		Chest chest = (Chest)state;
-		ItemStack[] chestinventory = chest.getInventory().getContents();
-		for (int i = 0; i < chestinventory.length && pi.firstEmpty() != -1; i++)
-		{
-			if (chestinventory[i] != null)
-			{
-				pi.addItem(chestinventory[i]);
-				chest.getInventory().removeItem(chestinventory[i]);
-			}
-		}
-		//Looting double chests requires more work...
-		DeathChest deathChest = persistence.getDeathChest(chestblock);
-		Block chest2 = deathChest.getSecondChest();
-		if (chest2 != null)
-		{
-			state = chest2.getState();
-			chest = (Chest)state;
-			chestinventory = chest.getInventory().getContents();
-			for (int i = 0; i < chestinventory.length && pi.firstEmpty() != -1; i++)
-			{
-				if (chestinventory[i] != null)
-				{
-					pi.addItem(chestinventory[i]);
-					chest.getInventory().removeItem(chestinventory[i]);
-				}
-			}
-		}
-		deathChest.removeAll();
+		persistence.getDeathChest(chestblock).loot(pi);
 	}
 }

@@ -48,6 +48,10 @@ import com.griefcraft.lwc.LWC;
 import com.griefcraft.model.Protection;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 public class DeathChest
 {
@@ -138,5 +142,32 @@ public class DeathChest
 	public void scheduleRemoval(Scheduler scheduler, long delay)
 	{
 		removalTask = scheduler.schedule(this::removeAll, delay);
+	}
+
+	public void loot(PlayerInventory target)
+	{
+		for (Block chestBlock : new Block[] { chest, secondChest })
+		{
+			if (chestBlock == null)
+			{
+				return;
+			}
+			Chest state = (Chest)chestBlock.getState();
+			Inventory inventory = state.getInventory();
+			for (ItemStack stack : inventory.getContents())
+			{
+				if (target.firstEmpty() == -1)
+				{
+					return;
+				}
+				if (stack != null)
+				{
+					target.addItem(stack);
+					inventory.removeItem(stack);
+				}
+			}
+		}
+		// we got to the end without returning, so we've fully looted the chest
+		removeAll();
 	}
 }
