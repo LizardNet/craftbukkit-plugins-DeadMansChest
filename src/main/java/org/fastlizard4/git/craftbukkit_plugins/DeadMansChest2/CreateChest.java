@@ -125,7 +125,7 @@ public class CreateChest implements Runnable
 			}
 		}
 
-		if (config.isLWCEnabled() && lwc != null && player.hasPermission("DeadMansChest2.lock"))
+		if (lwc != null && player.hasPermission("DeadMansChest2.lock"))
 		{
 			deathChest.lock(lwc, player.getName());
 		}

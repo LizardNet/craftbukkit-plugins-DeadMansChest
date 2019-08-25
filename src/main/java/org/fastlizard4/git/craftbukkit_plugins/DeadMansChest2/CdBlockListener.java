@@ -127,7 +127,7 @@ public class CdBlockListener implements Listener
 		{
 			if (persistence.isDeathChest(event.getBlock()))
 			{
-				if (config.isLWCEnabled() && lwc != null)
+				if (lwc != null)
 				{
 					Protection protection = lwc.findProtection(chestblock);
 					if (protection.getType() == com.griefcraft.model.Protection.Type.PRIVATE)

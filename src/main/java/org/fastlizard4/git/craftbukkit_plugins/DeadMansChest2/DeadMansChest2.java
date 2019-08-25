@@ -68,14 +68,6 @@ public class DeadMansChest2 extends JavaPlugin
 	@Override
 	public void onEnable()
 	{
-		LWC lwc = null;
-		Plugin lwcPlugin = getServer().getPluginManager().getPlugin("LWC");
-		if (lwcPlugin != null)
-		{
-			logger.info("[DeadMansChest2] LWC plugin found!");
-			lwc = ((LWCPlugin)lwcPlugin).getLWC();
-		}
-
 		try
 		{
 			File mainDir = new File("plugins/DeadMansChest2/");
@@ -94,6 +86,17 @@ public class DeadMansChest2 extends JavaPlugin
 		catch (IOException e)
 		{
 			logger.warning("[DeadMansChest2] Configuration error: " + e.getMessage());
+		}
+
+		LWC lwc = null;
+		if (configuration.isLWCEnabled())
+		{
+			Plugin lwcPlugin = getServer().getPluginManager().getPlugin("LWC");
+			if (lwcPlugin != null)
+			{
+				logger.info("[DeadMansChest2] LWC plugin found!");
+				lwc = ((LWCPlugin)lwcPlugin).getLWC();
+			}
 		}
 
 		Server server = getServer();
