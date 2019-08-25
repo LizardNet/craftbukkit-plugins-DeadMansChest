@@ -116,10 +116,13 @@ public class DeathChest
 
 	public void removeAll()
 	{
-		Protection protection = lwc.findProtection(chest);
-		if (protection != null)
+		if (lwc != null)
 		{
-			protection.remove();
+			Protection protection = lwc.findProtection(chest);
+			if (protection != null)
+			{
+				protection.remove();
+			}
 		}
 		for (int i = blocks.size() - 1; i >= 0; i--)
 		{
