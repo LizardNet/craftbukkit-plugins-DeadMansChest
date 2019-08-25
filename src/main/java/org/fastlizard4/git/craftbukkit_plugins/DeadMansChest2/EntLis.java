@@ -61,6 +61,8 @@ import org.bukkit.inventory.ItemStack;
 public class EntLis implements Listener
 {
 	private static final int MAX_ITEMS_PER_CHEST = 27;
+	private static final int MAX_OFFSET = 8;
+	private static final BlockFace[] HORIZONTALLY_ADJACENT = { BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH };
 
 	private Server server;
 	private Config config;
@@ -133,24 +135,13 @@ public class EntLis implements Listener
 			}
 		}
 
-		Block block = findOpenBlock(player.getLocation().getBlock());
-		if (block == null)
+		Block[] blocks = findOpenBlocks(player.getLocation().getBlock(), chestsToDeploy > 1);
+		if (blocks == null)
 		{
 			return;
 		}
-		Block block2 = null;
-		if (chestsToDeploy > 1)
-		{
-			for (BlockFace direction : new BlockFace[] { BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH })
-			{
-				Block adjacent = block.getRelative(direction);
-				if (Constants.AIR_BLOCKS.contains(adjacent.getType()))
-				{
-					block2 = adjacent;
-					break;
-				}
-			}
-		}
+		Block block = blocks[0];
+		Block block2 = blocks.length > 1 ? blocks[1] : null;
 
 		DeathChest deathChest = new DeathChest(config, persistence, block, block2, drops);
 
@@ -167,24 +158,46 @@ public class EntLis implements Listener
 		scheduler.schedule(new CreateChest(config, persistence, lwc, scheduler, block, player, deathChest), 1);
 	}
 
-	private Block findOpenBlock(Block searchStart)
+	@Nullable
+	private Block[] findOpenBlocks(Block searchStart, boolean needAdjacent)
 	{
-		//See if the block we are on is a block we can safely write over...
-		if (!Constants.AIR_BLOCKS.contains(searchStart.getType()))
+		for (int totalOffset = 0; totalOffset <= MAX_OFFSET; totalOffset++)
 		{
-			//Must not be, let's go a block up and see if that one is free...
-			Block tempblock = searchStart.getRelative(BlockFace.UP);
-			if (Constants.AIR_BLOCKS.contains(tempblock.getType()))
+			for (int xOffset = -totalOffset; xOffset <= totalOffset; xOffset++)
 			{
-				searchStart = tempblock;
-			}
-			else
-			{
-				//We can't find an open spot, so just spill the stuff on the ground...
-				return null;
+				int remainingOffset = xOffset < 0 ? totalOffset + xOffset : totalOffset - xOffset;
+				for (int zOffset = -remainingOffset; zOffset <= remainingOffset; zOffset++)
+				{
+					int yOffset = zOffset < 0 ? remainingOffset + zOffset : remainingOffset - zOffset;
+
+					Block cursor = searchStart.getRelative(xOffset, yOffset, zOffset);
+					if (!canPlaceChest(cursor))
+					{
+						continue;
+					}
+					if (!needAdjacent)
+					{
+						return new Block[] { cursor };
+					}
+					for (BlockFace direction : HORIZONTALLY_ADJACENT)
+					{
+						Block adjacent = cursor.getRelative(direction);
+						if (canPlaceChest(adjacent))
+						{
+							return new Block[] { cursor, adjacent };
+						}
+					}
+				}
 			}
 		}
-		return searchStart;
+		return null;
+	}
+
+	private boolean canPlaceChest(Block target)
+	{
+		Block above = target.getRelative(BlockFace.UP);
+		return Constants.AIR_BLOCKS.contains(target.getType())
+				&& Constants.AIR_BLOCKS.contains(above.getType());
 	}
 
 	private boolean isEmpty(List<ItemStack> items)
