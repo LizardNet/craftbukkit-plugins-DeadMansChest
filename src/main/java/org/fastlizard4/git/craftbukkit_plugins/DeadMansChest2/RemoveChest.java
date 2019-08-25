@@ -97,10 +97,10 @@ public class RemoveChest implements Runnable
 		while (rblocks.hasNext())
 		{
 			Block tblock = rblocks.next();
-			if (persistence.nodropblocks.contains(tblock))
+			if (persistence.isFakeBlock(tblock))
 			{
 				tblock.setType(Material.AIR);
-				persistence.nodropblocks.remove(tblock);
+				persistence.unregisterFakeBlock(tblock);
 			}
 		}
 		if (chestblock != null && lwc != null)
@@ -111,6 +111,6 @@ public class RemoveChest implements Runnable
 				protection.remove();
 			}
 		}
-		persistence.deathchests.remove(chestblock);
+		persistence.unregisterDeathChest(chestblock);
 	}
 }

@@ -96,7 +96,7 @@ public class CreateChest implements Runnable
 		LinkedList<Block> changedblocks = new LinkedList<Block>();
 		chestblock.setType(Material.CHEST);
 		changedblocks.add(chestblock);
-		persistence.nodropblocks.add(chestblock);
+		persistence.registerFakeBlock(chestblock);
 		BlockState state = chestblock.getState();
 		Chest chest = (Chest)state;
 		Chest chest2 = null;
@@ -112,7 +112,7 @@ public class CreateChest implements Runnable
 				{
 					tempblock.setType(Material.CHEST);
 					changedblocks.add(tempblock);
-					persistence.nodropblocks.add(tempblock);
+					persistence.registerFakeBlock(tempblock);
 					BlockState state2 = tempblock.getState();
 					chest2 = (Chest)state2;
 					noroom = false;
@@ -205,7 +205,7 @@ public class CreateChest implements Runnable
 				sign.setLine(1, "Deathpile");
 				sign.update();
 				changedblocks.add(signBlock);
-				persistence.nodropblocks.add(signBlock);
+				persistence.registerFakeBlock(signBlock);
 				//plugin.signblocks.put(chestblock, signBlock);
 			}
 			else
@@ -225,7 +225,7 @@ public class CreateChest implements Runnable
 					sign.setLine(1, "Deathpile");
 					sign.update();
 					changedblocks.add(signBlock);
-					persistence.nodropblocks.add(signBlock);
+					persistence.registerFakeBlock(signBlock);
 					//plugin.signblocks.put(chestblock, signBlock);
 				}
 			}
@@ -249,7 +249,7 @@ public class CreateChest implements Runnable
 							|| nextblock.getType() == Material.STATIONARY_LAVA)
 					{
 						nextblock.setType(Material.GLOWSTONE);
-						persistence.nodropblocks.add(nextblock);
+						persistence.registerFakeBlock(nextblock);
 						changedblocks.add(nextblock);
 					}
 				}
@@ -258,7 +258,7 @@ public class CreateChest implements Runnable
 					if (nextblock.getType() == Material.AIR)
 					{
 						nextblock.setType(Material.GLOWSTONE);
-						persistence.nodropblocks.add(nextblock);
+						persistence.registerFakeBlock(nextblock);
 						changedblocks.add(nextblock);
 					}
 				}
@@ -274,14 +274,14 @@ public class CreateChest implements Runnable
 			if (taskid != -1)
 			{
 				rc.setTaskID(taskid);
-				persistence.deathchests.put(chestblock, rc);
+				persistence.registerDeathChest(chestblock, rc);
 			}
 
 		}
 		else
 		{
 			RemoveChest rc = new RemoveChest(persistence, lwc, changedblocks, chestblock, chestblock2);
-			persistence.deathchests.put(chestblock, rc);
+			persistence.registerDeathChest(chestblock, rc);
 		}
 	}
 }

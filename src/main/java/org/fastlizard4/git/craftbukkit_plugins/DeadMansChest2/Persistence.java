@@ -39,13 +39,49 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
-import java.util.LinkedList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.block.Block;
 
 public class Persistence
 {
-	public LinkedList<Block> nodropblocks = new LinkedList<>();
-	public ConcurrentHashMap<Block, RemoveChest> deathchests = new ConcurrentHashMap<>();
+	private Set<Block> nodropblocks = new HashSet<>();
+	private ConcurrentHashMap<Block, RemoveChest> deathchests = new ConcurrentHashMap<>();
+
+	public void registerFakeBlock(Block block)
+	{
+		nodropblocks.add(block);
+	}
+
+	public void unregisterFakeBlock(Block block)
+	{
+		nodropblocks.remove(block);
+	}
+
+	public boolean isFakeBlock(Block block)
+	{
+		return nodropblocks.contains(block);
+	}
+
+	public void registerDeathChest(Block block, RemoveChest removalHook)
+	{
+		deathchests.put(block, removalHook);
+	}
+
+	public void unregisterDeathChest(Block block)
+	{
+		deathchests.remove(block);
+	}
+
+	public boolean isDeathChest(Block block)
+	{
+		return deathchests.containsKey(block);
+	}
+
+	public RemoveChest getRemovalHook(Block block)
+	{
+		return deathchests.get(block);
+	}
 }

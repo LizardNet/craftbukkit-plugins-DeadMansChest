@@ -80,7 +80,7 @@ public class CdBlockListener implements Listener
 	{
 		if (!event.isCancelled())
 		{
-			if (persistence.nodropblocks.contains(event.getBlock()))
+			if (persistence.isFakeBlock(event.getBlock()))
 			{
 				Block block = event.getBlock();
 				if (!config.isMineableDrops())
@@ -90,9 +90,9 @@ public class CdBlockListener implements Listener
 					{
 						//This fixes the sign bug and removes the glowstone tower
 						//as well.
-						if (persistence.deathchests.containsKey(block))
+						if (persistence.isDeathChest(block))
 						{
-							RemoveChest dcstuff = persistence.deathchests.get(block);
+							RemoveChest dcstuff = persistence.getRemovalHook(block);
 							dcstuff.removeTheChest();
 							//cancel the removal task.
 							if (dcstuff.getTaskID() != -1)
@@ -110,7 +110,7 @@ public class CdBlockListener implements Listener
 						block.setType(Material.AIR);
 					}
 				}
-				persistence.nodropblocks.remove(block);
+				persistence.unregisterFakeBlock(block);
 			}
 		}
 	}
@@ -120,7 +120,7 @@ public class CdBlockListener implements Listener
 	{
 		if (!event.isCancelled())
 		{
-			if (persistence.nodropblocks.contains(event.getBlock()) && !config.isMineableDrops())
+			if (persistence.isFakeBlock(event.getBlock()) && !config.isMineableDrops())
 			{
 				event.setCancelled(true);
 			}
@@ -132,7 +132,7 @@ public class CdBlockListener implements Listener
 	{
 		if (!event.isCancelled())
 		{
-			if (persistence.nodropblocks.contains(event.getBlock()) && !config.isMineableDrops())
+			if (persistence.isFakeBlock(event.getBlock()) && !config.isMineableDrops())
 			{
 				event.setCancelled(true);
 			}
@@ -150,7 +150,7 @@ public class CdBlockListener implements Listener
 		Block chestblock = event.getBlock();
 		if (player.isSneaking() && chestblock.getType() == Material.CHEST)
 		{
-			if (persistence.deathchests.containsKey(event.getBlock()))
+			if (persistence.isDeathChest(event.getBlock()))
 			{
 				if (config.isLWCEnabled() && lwc != null)
 				{
@@ -189,7 +189,7 @@ public class CdBlockListener implements Listener
 				chest.getInventory().removeItem(chestinventory[i]);
 			}
 		}
-		RemoveChest rc = persistence.deathchests.get(chestblock);
+		RemoveChest rc = persistence.getRemovalHook(chestblock);
 		//Looting double chests requires more work...
 		if (rc.chestblock2 != null)
 		{
