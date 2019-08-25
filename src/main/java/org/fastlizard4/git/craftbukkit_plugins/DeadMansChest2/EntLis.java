@@ -46,7 +46,6 @@ import javax.annotation.Nullable;
 
 import com.griefcraft.lwc.LWC;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.block.Block;
@@ -87,163 +86,177 @@ public class EntLis implements Listener
 	public void onEntityDeath(EntityDeathEvent event)
 	{
 		Entity entity = event.getEntity();
-
-		if (entity instanceof Player)
+		if (!(entity instanceof Player))
 		{
-			Player player = (Player)entity;
-			if (player.hasPermission("DeadMansChest2.chest"))
+			return;
+		}
+
+		Player player = (Player)entity;
+		if (!player.hasPermission("DeadMansChest2.chest"))
+		{
+			return;
+		}
+
+		Block block = findOpenBlock(player.getLocation().getBlock());
+		if (block == null)
+		{
+			return;
+		}
+
+		List<ItemStack> items = event.getDrops();
+		if (isEmpty(items))
+		{
+			return;
+		}
+
+		int i;
+		int j = 0;
+		boolean doublechest = false;
+		LinkedList<ItemStack> addeditems = new LinkedList<>();
+		//Check to see if the player has chests in his inventory
+		//if he doesn't have the free chest permission.
+		boolean needschests = false;
+		int chestcount = 0;
+		if (config.isNeedChestInInventory() && !player.hasPermission("DeadMansChest2.freechest"))
+		{
+			needschests = true;
+			for (i = 0; i < items.size(); i++)
 			{
-				Location lastLoc = player.getLocation();
-				Block block = lastLoc.getBlock();
-				//See if the block we are on is a block we can safely write over...
-				if (!Constants.AIR_BLOCKS.contains(block.getType()))
+				ItemStack item = items.get(i);
+				if (item != null && item.getType() == Material.CHEST)
 				{
-					//Must not be, let's go a block up and see if that one is free...
-					Block tempblock = block.getRelative(BlockFace.UP);
-					if (Constants.AIR_BLOCKS.contains(tempblock.getType()))
+					if (chestcount == 0)
 					{
-						block = tempblock;
+						chestcount += item.getAmount();
+						if (item.getAmount() > 2)
+						{
+							item.setAmount(item.getAmount() - 2);
+						}
+						else
+						{
+							items.remove(i);
+							//hack to get it to point in correct place.
+							i--;
+						}
+					}
+					else if (chestcount == 1)
+					{
+						chestcount += item.getAmount();
+						if (item.getAmount() > 1)
+						{
+							item.setAmount(item.getAmount() - 1);
+						}
+						else
+						{
+							items.remove(i);
+							//hack to get it to point in correct place.
+							i--;
+						}
 					}
 					else
 					{
-						//We can't find an open spot, so just spill the stuff on the ground...
-						return;
+						chestcount += item.getAmount();
 					}
 				}
-				boolean doublechest = false;
-				int j = 0;
-				List<ItemStack> items = event.getDrops();
-				LinkedList<ItemStack> addeditems = new LinkedList<ItemStack>();
-				int i;
-				//Code to check if the player's inventory is empty.
-				boolean isempty = true;
-				for (i = 0; i < items.size() && isempty; i++)
-				{
-					ItemStack item = items.get(i);
-					if (item != null && item.getType() != Material.AIR)
-					{
-						isempty = false;
-					}
-				}
-				if (isempty)
-				{
-					return;
-				}
-
-				//Check to see if the player has chests in his inventory
-				//if he doesn't have the free chest permission.
-				boolean needschests = false;
-				int chestcount = 0;
-				if (config.isNeedChestInInventory() && !player.hasPermission("DeadMansChest2.freechest"))
-				{
-					needschests = true;
-					for (i = 0; i < items.size(); i++)
-					{
-						ItemStack item = items.get(i);
-						if (item != null && item.getType() == Material.CHEST)
-						{
-							if (chestcount == 0)
-							{
-								chestcount += item.getAmount();
-								if (item.getAmount() > 2)
-								{
-									item.setAmount(item.getAmount() - 2);
-								}
-								else
-								{
-									items.remove(i);
-									//hack to get it to point in correct place.
-									i--;
-								}
-							}
-							else if (chestcount == 1)
-							{
-								chestcount += item.getAmount();
-								if (item.getAmount() > 1)
-								{
-									item.setAmount(item.getAmount() - 1);
-								}
-								else
-								{
-									items.remove(i);
-									//hack to get it to point in correct place.
-									i--;
-								}
-							}
-							else
-							{
-								chestcount += item.getAmount();
-							}
-						}
-					}
-					//If the chest count is still zero, the player doesn't have
-					//any chests...
-					if (chestcount == 0)
-					{
-						return;
-					}
-				}
-
-				for (i = 0; i < items.size() && j < 27; i++)
-				{
-					ItemStack item = items.get(i);
-					if (item != null && item.getType() != Material.AIR)
-					{
-						addeditems.add(item);
-						items.remove(i);
-						//A little hack to make sure the pointer is pointing to the right place...
-						i--;
-						j++;
-					}
-				}
-				//The player is carrying too many items to fit in one chest. Let's make it a double chest (if they have permission).
-				if (j == 27 && player.hasPermission("DeadMansChest2.doublechest") && (!needschests || (needschests && chestcount > 1)))
-				{
-					BlockFace[] direction = { BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH };
-					boolean noroom = true;
-					for (int y = 0; y < direction.length && noroom; y++)
-					{
-						Block tempblock = block.getRelative(direction[y]);
-						if (Constants.AIR_BLOCKS.contains(tempblock.getType()))
-						{
-							//we have an adjacent empty block, let's go ahead and add those items to another chest!
-							for (; i < items.size(); i++)
-							{
-								ItemStack item = items.get(i);
-								if (item != null && item.getType() != Material.AIR)
-								{
-									addeditems.add(item);
-									items.remove(i);
-									//A little hack to make sure the pointer is pointing to the right place...
-									i--;
-									j++;
-								}
-							}
-							//Let's exit the loop.
-							noroom = false;
-							doublechest = true;
-						}
-					}
-				}
-				else if (needschests && chestcount > 1)
-				{
-					//The player didn't have enough items to be in a double chest,
-					//so let's add the other chest if there is room.
-					addeditems.add(new ItemStack(Material.CHEST, 1));
-				}
-
-				if (!config.isDropsEnabled() && !player.hasPermission("DeadMansChest2.drops"))
-				{
-					event.getDrops().clear();
-				}
-
-				if (config.isDeathMessage() && player.hasPermission("DeadMansChest2.message"))
-				{
-					this.server.broadcastMessage(ChatColor.RED + player.getDisplayName() + ChatColor.WHITE + " " + config.getDeathMessageString());
-				}
-
-				scheduler.schedule(new CreateChest(config, persistence, lwc, scheduler, block, addeditems, player, doublechest), 1);
+			}
+			//If the chest count is still zero, the player doesn't have
+			//any chests...
+			if (chestcount == 0)
+			{
+				return;
 			}
 		}
+
+		for (i = 0; i < items.size() && j < 27; i++)
+		{
+			ItemStack item = items.get(i);
+			if (item != null && item.getType() != Material.AIR)
+			{
+				addeditems.add(item);
+				items.remove(i);
+				//A little hack to make sure the pointer is pointing to the right place...
+				i--;
+				j++;
+			}
+		}
+		//The player is carrying too many items to fit in one chest. Let's make it a double chest (if they have permission).
+		if (j == 27 && player.hasPermission("DeadMansChest2.doublechest") && (!needschests || (needschests && chestcount > 1)))
+		{
+			BlockFace[] direction = { BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH };
+			boolean noroom = true;
+			for (int y = 0; y < direction.length && noroom; y++)
+			{
+				Block tempblock = block.getRelative(direction[y]);
+				if (Constants.AIR_BLOCKS.contains(tempblock.getType()))
+				{
+					//we have an adjacent empty block, let's go ahead and add those items to another chest!
+					for (; i < items.size(); i++)
+					{
+						ItemStack item = items.get(i);
+						if (item != null && item.getType() != Material.AIR)
+						{
+							addeditems.add(item);
+							items.remove(i);
+							//A little hack to make sure the pointer is pointing to the right place...
+							i--;
+							j++;
+						}
+					}
+					//Let's exit the loop.
+					noroom = false;
+					doublechest = true;
+				}
+			}
+		}
+		else if (needschests && chestcount > 1)
+		{
+			//The player didn't have enough items to be in a double chest,
+			//so let's add the other chest if there is room.
+			addeditems.add(new ItemStack(Material.CHEST, 1));
+		}
+
+		if (!config.isDropsEnabled() && !player.hasPermission("DeadMansChest2.drops"))
+		{
+			event.getDrops().clear();
+		}
+
+		if (config.isDeathMessage() && player.hasPermission("DeadMansChest2.message"))
+		{
+			this.server.broadcastMessage(ChatColor.RED + player.getDisplayName() + ChatColor.WHITE + " " + config.getDeathMessageString());
+		}
+
+		scheduler.schedule(new CreateChest(config, persistence, lwc, scheduler, block, addeditems, player, doublechest), 1);
+	}
+
+	private Block findOpenBlock(Block searchStart)
+	{
+		//See if the block we are on is a block we can safely write over...
+		if (!Constants.AIR_BLOCKS.contains(searchStart.getType()))
+		{
+			//Must not be, let's go a block up and see if that one is free...
+			Block tempblock = searchStart.getRelative(BlockFace.UP);
+			if (Constants.AIR_BLOCKS.contains(tempblock.getType()))
+			{
+				searchStart = tempblock;
+			}
+			else
+			{
+				//We can't find an open spot, so just spill the stuff on the ground...
+				return null;
+			}
+		}
+		return searchStart;
+	}
+
+	private boolean isEmpty(List<ItemStack> items)
+	{
+		for (ItemStack itemStack : items)
+		{
+			if (itemStack != null && itemStack.getType() != Material.AIR)
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 }
