@@ -39,7 +39,7 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -60,6 +60,8 @@ import org.bukkit.inventory.ItemStack;
 
 public class EntLis implements Listener
 {
+	private static final int MAX_ITEMS_PER_CHEST = 27;
+
 	private Server server;
 	private Config config;
 	private Persistence persistence;
@@ -97,127 +99,64 @@ public class EntLis implements Listener
 			return;
 		}
 
+		List<ItemStack> drops = event.getDrops();
+		if (isEmpty(drops))
+		{
+			return;
+		}
+
+		int chestsToDeploy;
+		if (config.isNeedChestInInventory() && !player.hasPermission("DeadMansChest2.freechest"))
+		{
+			int chestCount = countChests(drops);
+			if (chestCount == 0)
+			{
+				return;
+			}
+			chestsToDeploy = 1;
+			int tentativeItemCount = countStacks(drops, 1);
+			if (chestCount > 1 && tentativeItemCount > MAX_ITEMS_PER_CHEST && player.hasPermission("DeadMansChest2.doublechest"))
+			{
+				chestsToDeploy = 2;
+			}
+			removeChests(drops, chestsToDeploy);
+		}
+		else
+		{
+			if (countStacks(drops, 0) > MAX_ITEMS_PER_CHEST && player.hasPermission("DeadMansChest2.doublechest"))
+			{
+				chestsToDeploy = 2;
+			}
+			else
+			{
+				chestsToDeploy = 1;
+			}
+		}
+
 		Block block = findOpenBlock(player.getLocation().getBlock());
 		if (block == null)
 		{
 			return;
 		}
-
-		List<ItemStack> items = event.getDrops();
-		if (isEmpty(items))
+		Block block2 = null;
+		if (chestsToDeploy > 1)
 		{
-			return;
-		}
-
-		int i;
-		int j = 0;
-		boolean doublechest = false;
-		LinkedList<ItemStack> addeditems = new LinkedList<>();
-		//Check to see if the player has chests in his inventory
-		//if he doesn't have the free chest permission.
-		boolean needschests = false;
-		int chestcount = 0;
-		if (config.isNeedChestInInventory() && !player.hasPermission("DeadMansChest2.freechest"))
-		{
-			needschests = true;
-			for (i = 0; i < items.size(); i++)
+			for (BlockFace direction : new BlockFace[] { BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH })
 			{
-				ItemStack item = items.get(i);
-				if (item != null && item.getType() == Material.CHEST)
+				Block adjacent = block.getRelative(direction);
+				if (Constants.AIR_BLOCKS.contains(adjacent.getType()))
 				{
-					if (chestcount == 0)
-					{
-						chestcount += item.getAmount();
-						if (item.getAmount() > 2)
-						{
-							item.setAmount(item.getAmount() - 2);
-						}
-						else
-						{
-							items.remove(i);
-							//hack to get it to point in correct place.
-							i--;
-						}
-					}
-					else if (chestcount == 1)
-					{
-						chestcount += item.getAmount();
-						if (item.getAmount() > 1)
-						{
-							item.setAmount(item.getAmount() - 1);
-						}
-						else
-						{
-							items.remove(i);
-							//hack to get it to point in correct place.
-							i--;
-						}
-					}
-					else
-					{
-						chestcount += item.getAmount();
-					}
-				}
-			}
-			//If the chest count is still zero, the player doesn't have
-			//any chests...
-			if (chestcount == 0)
-			{
-				return;
-			}
-		}
-
-		for (i = 0; i < items.size() && j < 27; i++)
-		{
-			ItemStack item = items.get(i);
-			if (item != null && item.getType() != Material.AIR)
-			{
-				addeditems.add(item);
-				items.remove(i);
-				//A little hack to make sure the pointer is pointing to the right place...
-				i--;
-				j++;
-			}
-		}
-		//The player is carrying too many items to fit in one chest. Let's make it a double chest (if they have permission).
-		if (j == 27 && player.hasPermission("DeadMansChest2.doublechest") && (!needschests || (needschests && chestcount > 1)))
-		{
-			BlockFace[] direction = { BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH };
-			boolean noroom = true;
-			for (int y = 0; y < direction.length && noroom; y++)
-			{
-				Block tempblock = block.getRelative(direction[y]);
-				if (Constants.AIR_BLOCKS.contains(tempblock.getType()))
-				{
-					//we have an adjacent empty block, let's go ahead and add those items to another chest!
-					for (; i < items.size(); i++)
-					{
-						ItemStack item = items.get(i);
-						if (item != null && item.getType() != Material.AIR)
-						{
-							addeditems.add(item);
-							items.remove(i);
-							//A little hack to make sure the pointer is pointing to the right place...
-							i--;
-							j++;
-						}
-					}
-					//Let's exit the loop.
-					noroom = false;
-					doublechest = true;
+					block2 = adjacent;
+					break;
 				}
 			}
 		}
-		else if (needschests && chestcount > 1)
-		{
-			//The player didn't have enough items to be in a double chest,
-			//so let's add the other chest if there is room.
-			addeditems.add(new ItemStack(Material.CHEST, 1));
-		}
+
+		DeathChest deathChest = new DeathChest(config, persistence, block, block2, drops);
 
 		if (!config.isDropsEnabled() && !player.hasPermission("DeadMansChest2.drops"))
 		{
-			event.getDrops().clear();
+			drops.clear();
 		}
 
 		if (config.isDeathMessage() && player.hasPermission("DeadMansChest2.message"))
@@ -225,7 +164,7 @@ public class EntLis implements Listener
 			this.server.broadcastMessage(ChatColor.RED + player.getDisplayName() + ChatColor.WHITE + " " + config.getDeathMessageString());
 		}
 
-		scheduler.schedule(new CreateChest(config, persistence, lwc, scheduler, block, addeditems, player, doublechest), 1);
+		scheduler.schedule(new CreateChest(config, persistence, lwc, scheduler, block, player, deathChest), 1);
 	}
 
 	private Block findOpenBlock(Block searchStart)
@@ -258,5 +197,63 @@ public class EntLis implements Listener
 			}
 		}
 		return true;
+	}
+
+	private int countChests(List<ItemStack> items)
+	{
+		int count = 0;
+		for (ItemStack itemStack : items)
+		{
+			if (itemStack != null && itemStack.getType() == Material.CHEST)
+			{
+				count += itemStack.getAmount();
+			}
+		}
+		return count;
+	}
+
+	private int countStacks(List<ItemStack> items, int skipChests)
+	{
+		int count = 0;
+		for (ItemStack itemStack : items)
+		{
+			if (itemStack == null)
+			{
+				continue;
+			}
+			if (itemStack.getType() == Material.CHEST)
+			{
+				skipChests -= itemStack.getAmount();
+				if (skipChests >= 0)
+				{
+					continue;
+				}
+			}
+			count++;
+		}
+		return count;
+	}
+
+	private void removeChests(List<ItemStack> items, int count)
+	{
+		Iterator<ItemStack> iter = items.iterator();
+		while (iter.hasNext() && count > 0)
+		{
+			ItemStack itemStack = iter.next();
+			if (itemStack == null || itemStack.getType() != Material.CHEST)
+			{
+				continue;
+			}
+			int newAmount = itemStack.getAmount() - count;
+			if (newAmount > 0)
+			{
+				itemStack.setAmount(newAmount);
+			}
+			else
+			{
+				count = -newAmount;
+				iter.remove();
+			}
+		}
 	}
 }

@@ -39,8 +39,6 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
-import java.util.LinkedList;
-
 import javax.annotation.Nullable;
 
 import com.griefcraft.lwc.LWC;
@@ -48,10 +46,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 public class CreateChest implements Runnable
 {
@@ -62,10 +58,8 @@ public class CreateChest implements Runnable
 	private Scheduler scheduler;
 
 	private Block chestblock;
-	private Block chestblock2;
-	private LinkedList<ItemStack> chestitems;
 	private Player player;
-	private boolean doublechest;
+	private DeathChest deathChest;
 
 	public CreateChest(
 			Config config,
@@ -73,9 +67,8 @@ public class CreateChest implements Runnable
 			@Nullable LWC lwc,
 			Scheduler scheduler,
 			Block chestblock,
-			LinkedList<ItemStack> chestitems,
 			Player player,
-			boolean doublechest
+			DeathChest deathChest
 	)
 	{
 		this.config = config;
@@ -83,48 +76,13 @@ public class CreateChest implements Runnable
 		this.lwc = lwc;
 		this.scheduler = scheduler;
 		this.chestblock = chestblock;
-		this.chestitems = chestitems;
 		this.player = player;
-		this.doublechest = doublechest;
+		this.deathChest = deathChest;
 	}
 
 	@Override
 	public void run()
 	{
-		if (doublechest)
-		{
-			BlockFace[] direction = { BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH };
-			for (int y = 0; y < direction.length; y++)
-			{
-				Block tempblock = chestblock.getRelative(direction[y]);
-				if (Constants.AIR_BLOCKS.contains(tempblock.getType()))
-				{
-					chestblock2 = tempblock;
-					break;
-				}
-			}
-		}
-		Chest chest = (Chest)chestblock.getState();
-		Chest chest2 = chestblock2 != null ? (Chest)chestblock2.getState() : null;
-		DeathChest deathChest = new DeathChest(config, persistence, chestblock, chestblock2);
-
-		int j = 0;
-		for (ItemStack item : chestitems)
-		{
-			if (item != null && item.getType() != Material.AIR)
-			{
-				if (j < 27)
-				{
-					chest.getInventory().addItem(item);
-				}
-				else
-				{
-					chest2.getInventory().addItem(item);
-				}
-				j++;
-			}
-		}
-
 		if (lwc != null && player.hasPermission("DeadMansChest2.lock"))
 		{
 			deathChest.lock(lwc, player.getName());

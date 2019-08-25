@@ -40,6 +40,7 @@
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -65,7 +66,7 @@ public class DeathChest
 	private LWC lwc;
 	private Cancellable removalTask;
 
-	public DeathChest(Config config, Persistence persistence, Block chest, @Nullable Block secondChest)
+	public DeathChest(Config config, Persistence persistence, Block chest, @Nullable Block secondChest, List<ItemStack> items)
 	{
 		this.config = config;
 		this.persistence = persistence;
@@ -76,17 +77,28 @@ public class DeathChest
 		{
 			setBlock(secondChest, Material.CHEST);
 		}
+
+		Iterator<ItemStack> iter = items.iterator();
+		for (Inventory inventory : getInventories())
+		{
+			int remaining = 27;
+			while (iter.hasNext() && remaining > 0)
+			{
+				ItemStack itemStack = iter.next();
+				if (itemStack == null || itemStack.getType() == Material.AIR)
+				{
+					continue;
+				}
+				inventory.addItem(itemStack);
+				iter.remove();
+				remaining--;
+			}
+		}
 	}
 
 	public Block getChest()
 	{
 		return chest;
-	}
-
-	@Nullable
-	public Block getSecondChest()
-	{
-		return secondChest;
 	}
 
 	public void setBlock(Block block, Material material)
@@ -149,14 +161,8 @@ public class DeathChest
 
 	public void loot(PlayerInventory target)
 	{
-		for (Block chestBlock : new Block[] { chest, secondChest })
+		for (Inventory inventory : getInventories())
 		{
-			if (chestBlock == null)
-			{
-				return;
-			}
-			Chest state = (Chest)chestBlock.getState();
-			Inventory inventory = state.getInventory();
 			for (ItemStack stack : inventory.getContents())
 			{
 				if (target.firstEmpty() == -1)
@@ -172,5 +178,19 @@ public class DeathChest
 		}
 		// we got to the end without returning, so we've fully looted the chest
 		removeAll();
+	}
+
+	private Inventory[] getInventories()
+	{
+		if (secondChest != null)
+		{
+			return new Inventory[] { getChestInventory(chest), getChestInventory(secondChest) };
+		}
+		return new Inventory[] { getChestInventory(chest) };
+	}
+
+	private static Inventory getChestInventory(Block chestBlock)
+	{
+		return ((Chest)chestBlock.getState()).getInventory();
 	}
 }
