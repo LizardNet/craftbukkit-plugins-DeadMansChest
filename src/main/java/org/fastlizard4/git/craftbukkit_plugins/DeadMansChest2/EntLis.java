@@ -152,7 +152,18 @@ public class EntLis implements Listener
 
 		if (config.isDeathMessage() && player.hasPermission("DeadMansChest2.message"))
 		{
-			this.server.broadcastMessage(ChatColor.RED + player.getDisplayName() + ChatColor.WHITE + " " + config.getDeathMessageString());
+			String positionString = block.getX() + ", " + block.getY() + ", " + block.getZ();
+			String deathMessageString = config.getDeathMessageString()
+				.replaceAll("{position}", positionString)
+				.replaceAll("{player}", player.getDisplayName());
+			for (ChatColor c : ChatColor.values())
+			{
+				if (c.isColor())
+				{
+					deathMessageString = deathMessageString.replaceAll("{" + c.name() + "}", c.toString());
+				}
+			}
+			this.server.broadcastMessage(deathMessageString);
 		}
 
 		scheduler.schedule(new CreateChest(config, persistence, lwc, scheduler, block, player, deathChest), 1);
