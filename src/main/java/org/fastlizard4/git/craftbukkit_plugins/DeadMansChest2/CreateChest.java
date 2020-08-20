@@ -1,4 +1,4 @@
-/**
+/*
  * DEADMANSCHEST2
  * by Andrew "FastLizard4" Adams, TLUL, and the LizardNet CraftBukkit Plugins
  * Development Team (see AUTHORS.txt file)
@@ -51,19 +51,17 @@ import org.bukkit.entity.Player;
 
 public class CreateChest implements Runnable
 {
-	private Config config;
-	private Persistence persistence;
+	private final Config config;
 	@Nullable
-	private LWC lwc;
-	private Scheduler scheduler;
+	private final LWC lwc;
+	private final Scheduler scheduler;
 
-	private Block chestblock;
-	private Player player;
-	private DeathChest deathChest;
+	private final Block chestblock;
+	private final Player player;
+	private final DeathChest deathChest;
 
 	public CreateChest(
 			Config config,
-			Persistence persistence,
 			@Nullable LWC lwc,
 			Scheduler scheduler,
 			Block chestblock,
@@ -72,7 +70,6 @@ public class CreateChest implements Runnable
 	)
 	{
 		this.config = config;
-		this.persistence = persistence;
 		this.lwc = lwc;
 		this.scheduler = scheduler;
 		this.chestblock = chestblock;

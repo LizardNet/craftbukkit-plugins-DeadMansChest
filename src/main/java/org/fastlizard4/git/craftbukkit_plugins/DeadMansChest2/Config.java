@@ -1,4 +1,4 @@
-/**
+/*
  * DEADMANSCHEST2
  * by Andrew "FastLizard4" Adams, TLUL, and the LizardNet CraftBukkit Plugins
  * Development Team (see AUTHORS.txt file)
@@ -86,7 +86,7 @@ public class Config
 	public void load(File configFile) throws IOException
 	{
 		try (
-				FileInputStream in = new FileInputStream(configFile);
+				FileInputStream in = new FileInputStream(configFile)
 		)
 		{
 			Properties prop = new Properties();

@@ -1,4 +1,4 @@
-/**
+/*
  * DEADMANSCHEST2
  * by Andrew "FastLizard4" Adams, TLUL, and the LizardNet CraftBukkit Plugins
  * Development Team (see AUTHORS.txt file)
@@ -56,7 +56,7 @@ public class DeadMansChest2 extends JavaPlugin
 {
 	private static final Logger logger = Logger.getLogger("Minecraft");
 
-	private Config configuration = new Config();
+	private final Config configuration = new Config();
 
 	@Override
 	public void onDisable()
@@ -70,8 +70,12 @@ public class DeadMansChest2 extends JavaPlugin
 	{
 		try
 		{
-			File mainDir = new File("plugins/DeadMansChest2/");
-			mainDir.mkdirs();
+			File mainDir = new File(Constants.PLUGIN_DATA_DIRECTORY);
+
+			if (!mainDir.mkdirs())
+			{
+				logger.warning("[DeadMansChest2] Could not create plugin data directory at " + Constants.PLUGIN_DATA_DIRECTORY);
+			}
 
 			File configFile = new File(mainDir + "Config.cfg");
 			if (configFile.exists())
@@ -109,7 +113,7 @@ public class DeadMansChest2 extends JavaPlugin
 
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(new EntLis(server, configuration, persistence, lwc, scheduler), this);
-		pm.registerEvents(new CdBlockListener(server, configuration, persistence, lwc), this);
+		pm.registerEvents(new CdBlockListener(configuration, persistence, lwc), this);
 
 		logger.info("[DeadMansChest2] loaded.");
 	}

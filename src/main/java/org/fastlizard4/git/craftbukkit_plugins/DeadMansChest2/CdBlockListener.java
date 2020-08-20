@@ -1,4 +1,4 @@
-/**
+/*
  * DEADMANSCHEST2
  * by Andrew "FastLizard4" Adams, TLUL, and the LizardNet CraftBukkit Plugins
  * Development Team (see AUTHORS.txt file)
@@ -44,7 +44,6 @@ import javax.annotation.Nullable;
 import com.griefcraft.lwc.LWC;
 import com.griefcraft.model.Protection;
 import org.bukkit.Material;
-import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -58,15 +57,13 @@ import org.bukkit.inventory.PlayerInventory;
 
 public class CdBlockListener implements Listener
 {
-	private Server server;
-	private Config config;
-	private Persistence persistence;
+	private final Config config;
+	private final Persistence persistence;
 	@Nullable
-	private LWC lwc;
+	private final LWC lwc;
 
-	public CdBlockListener(Server server, Config config, Persistence persistence, @Nullable LWC lwc)
+	public CdBlockListener(Config config, Persistence persistence, @Nullable LWC lwc)
 	{
-		this.server = server;
 		this.config = config;
 		this.persistence = persistence;
 		this.lwc = lwc;
@@ -86,7 +83,7 @@ public class CdBlockListener implements Listener
 			{
 				event.setCancelled(true);
 			}
-			persistence.unregisterFakeBlock(block);
+			persistence.removeAndUnregisterFakeBlock(block);
 		}
 	}
 

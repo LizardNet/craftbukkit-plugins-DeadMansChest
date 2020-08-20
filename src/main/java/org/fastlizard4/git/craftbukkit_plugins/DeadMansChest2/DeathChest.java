@@ -1,4 +1,4 @@
-/**
+/*
  * DEADMANSCHEST2
  * by Andrew "FastLizard4" Adams, TLUL, and the LizardNet CraftBukkit Plugins
  * Development Team (see AUTHORS.txt file)
@@ -145,6 +145,7 @@ public class DeathChest
 		removalTask.cancel();
 	}
 
+	@SuppressWarnings("deprecation")
 	public void lock(LWC lwc, String playerName)
 	{
 		this.lwc = lwc;

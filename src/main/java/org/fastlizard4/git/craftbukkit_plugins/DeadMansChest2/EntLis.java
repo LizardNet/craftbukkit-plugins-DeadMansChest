@@ -1,4 +1,4 @@
-/**
+/*
  * DEADMANSCHEST2
  * by Andrew "FastLizard4" Adams, TLUL, and the LizardNet CraftBukkit Plugins
  * Development Team (see AUTHORS.txt file)
@@ -64,12 +64,12 @@ public class EntLis implements Listener
 	private static final int MAX_OFFSET = 8;
 	private static final BlockFace[] HORIZONTALLY_ADJACENT = { BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH };
 
-	private Server server;
-	private Config config;
-	private Persistence persistence;
+	private final Server server;
+	private final Config config;
+	private final Persistence persistence;
 	@Nullable
-	private LWC lwc;
-	private Scheduler scheduler;
+	private final LWC lwc;
+	private final Scheduler scheduler;
 
 	public EntLis(
 			Server server,
@@ -154,8 +154,8 @@ public class EntLis implements Listener
 		{
 			String positionString = block.getX() + ", " + block.getY() + ", " + block.getZ();
 			String deathMessageString = config.getDeathMessageString()
-				.replaceAll("{position}", positionString)
-				.replaceAll("{player}", player.getDisplayName());
+				.replaceAll("\\{position}", positionString)
+				.replaceAll("\\{player}", player.getDisplayName());
 			for (ChatColor c : ChatColor.values())
 			{
 				if (c.isColor())
@@ -166,7 +166,7 @@ public class EntLis implements Listener
 			this.server.broadcastMessage(deathMessageString);
 		}
 
-		scheduler.schedule(new CreateChest(config, persistence, lwc, scheduler, block, player, deathChest), 1);
+		scheduler.schedule(new CreateChest(config, lwc, scheduler, block, player, deathChest), 1);
 	}
 
 	@Nullable
