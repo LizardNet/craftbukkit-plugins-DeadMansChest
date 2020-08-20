@@ -160,7 +160,7 @@ public class EntLis implements Listener
 			{
 				if (c.isColor())
 				{
-					deathMessageString = deathMessageString.replaceAll("{" + c.name() + "}", c.toString());
+					deathMessageString = deathMessageString.replaceAll("\\{" + c.name() + "}", c.toString());
 				}
 			}
 			this.server.broadcastMessage(deathMessageString);
