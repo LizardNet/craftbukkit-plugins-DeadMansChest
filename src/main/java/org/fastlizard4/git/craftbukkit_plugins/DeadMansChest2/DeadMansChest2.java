@@ -40,7 +40,6 @@
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -80,14 +79,18 @@ public class DeadMansChest2 extends JavaPlugin
 			File configFile = new File(mainDir + "Config.cfg");
 			if (configFile.exists())
 			{
+				logger.info("[DeadMansChest2] Found configuration file; loading");
 				configuration.load(configFile);
 			}
 			else
 			{
+				logger.warning("[DeadMansChest2] Configuration file not found; creating a fresh one for you");
 				configuration.save(configFile);
 			}
+
+			logger.info("[DeadMansChest2] " + ConfigDebugHelper.dumpConfig(configuration));
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			logger.warning("[DeadMansChest2] Configuration error: " + e.getMessage());
 		}
