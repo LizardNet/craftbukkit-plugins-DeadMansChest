@@ -8,7 +8,7 @@
  * (which was in turn based upon:)
  * PlayerChestDeath by Wesnc, <https://github.com/Wesnc/PlayerChestDeath>
  *
- * Copyright (C) 2013-2019 by Andrew "FastLizard4" Adams, TLUL, and the LizardNet
+ * Copyright (C) 2013-2020 by Andrew "FastLizard4" Adams, TLUL, and the LizardNet
  * CraftBukkit Plugins Development Team. Some rights reserved.
  *
  * License GPLv3+: GNU General Public License version 3 or later (at your
@@ -40,7 +40,6 @@
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,22 +71,29 @@ public class DeadMansChest2 extends JavaPlugin
 		{
 			File mainDir = new File(Constants.PLUGIN_DATA_DIRECTORY);
 
-			if (!mainDir.mkdirs())
+			if (!mainDir.exists() && !mainDir.mkdirs())
 			{
-				logger.warning("[DeadMansChest2] Could not create plugin data directory at " + Constants.PLUGIN_DATA_DIRECTORY);
+				logger.warning("[DeadMansChest2] Could not create plugin data directory at " +
+						Constants.PLUGIN_DATA_DIRECTORY);
 			}
 
-			File configFile = new File(mainDir + "Config.cfg");
+			File configFile = new File(mainDir + "/Config.cfg");
 			if (configFile.exists())
 			{
+				logger.info("[DeadMansChest2] Found configuration file at " + configFile + "; loading");
 				configuration.load(configFile);
 			}
 			else
 			{
+				logger.warning("[DeadMansChest2] Configuration file not found at " + configFile +
+						"; creating a fresh one for you");
 				configuration.save(configFile);
 			}
+
+			// TODO: Comment out when we're reasonably sure after reasonable testing that everything works
+			logger.info("[DeadMansChest2] " + ConfigDebugHelper.dumpConfig(configuration));
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			logger.warning("[DeadMansChest2] Configuration error: " + e.getMessage());
 		}

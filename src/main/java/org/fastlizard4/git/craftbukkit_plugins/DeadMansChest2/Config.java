@@ -8,7 +8,7 @@
  * (which was in turn based upon:)
  * PlayerChestDeath by Wesnc, <https://github.com/Wesnc/PlayerChestDeath>
  *
- * Copyright (C) 2013-2019 by Andrew "FastLizard4" Adams, TLUL, and the LizardNet
+ * Copyright (C) 2013-2020 by Andrew "FastLizard4" Adams, TLUL, and the LizardNet
  * CraftBukkit Plugins Development Team. Some rights reserved.
  *
  * License GPLv3+: GNU General Public License version 3 or later (at your
@@ -75,11 +75,11 @@ public class Config
 	@ConfigDescription("If death messages are enabled, the string to display")
 	private String DeathMessageString = "died. Deploying death chest.";
 	@ConfigDescription("How long, in seconds, before the chest disappears and the items spill out?")
-	private int ChestDeleteInterval = 80;
+	private int ChestDeleteInterval = 3600;
 	@ConfigDescription("Should we drop items that don't fit into the chest (true), or just remove them from the world (false)?")
 	private boolean DropsEnabled = true;
 	@ConfigDescription("Should we delete the chests after a certain time frame?")
-	private boolean ChestDeleteIntervalEnabled = true;
+	private boolean ChestDeleteIntervalEnabled = false;
 	@ConfigDescription("Should players be allowed to loot death chests when they sneak click on one?")
 	private boolean ChestLoot = false;
 
