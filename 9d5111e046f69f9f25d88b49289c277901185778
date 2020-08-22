@@ -22,6 +22,30 @@
       "revId": "9d5111e046f69f9f25d88b49289c277901185778",
       "serverId": "cf5d0eaf-4814-484b-b55f-41cd7f22928e",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c4503f6d_3f410e1f",
+        "filename": "src/main/java/org/fastlizard4/git/craftbukkit_plugins/DeadMansChest2/EntLis.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1
+      },
+      "writtenOn": "2020-08-22T09:24:27Z",
+      "side": 1,
+      "message": "Mmm, I originally didn\u0027t do that because I felt it odd to add Persistence to CreateChest, but now I see that LWC, Config, and Scheduler are there so it makes sense. I suppose it doesn\u0027t make a difference if we register the chest right after creating it, or after also creating the pillar and sign.",
+      "parentUuid": "8eb325d6_727d0232",
+      "range": {
+        "startLine": 169,
+        "startChar": 2,
+        "endLine": 169,
+        "endChar": 52
+      },
+      "revId": "9d5111e046f69f9f25d88b49289c277901185778",
+      "serverId": "cf5d0eaf-4814-484b-b55f-41cd7f22928e",
+      "unresolved": true
     }
   ]
 }
