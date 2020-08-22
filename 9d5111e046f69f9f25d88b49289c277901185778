@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8eb325d6_727d0232",
+        "filename": "src/main/java/org/fastlizard4/git/craftbukkit_plugins/DeadMansChest2/EntLis.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 5
+      },
+      "writtenOn": "2020-08-22T06:11:52Z",
+      "side": 1,
+      "message": "I think this feels like it should be CreateChest\u0027s job. I\u0027ll upload a new patchset with my proposal.",
+      "range": {
+        "startLine": 169,
+        "startChar": 2,
+        "endLine": 169,
+        "endChar": 52
+      },
+      "revId": "9d5111e046f69f9f25d88b49289c277901185778",
+      "serverId": "cf5d0eaf-4814-484b-b55f-41cd7f22928e",
+      "unresolved": true
+    }
+  ]
+}
