@@ -166,6 +166,7 @@ public class EntLis implements Listener
 			this.server.broadcastMessage(deathMessageString);
 		}
 
+		persistence.registerDeathChest(block, deathChest);
 		scheduler.schedule(new CreateChest(config, lwc, scheduler, block, player, deathChest), 1);
 	}
 

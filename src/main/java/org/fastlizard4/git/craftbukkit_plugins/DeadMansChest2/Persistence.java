@@ -49,6 +49,17 @@ public class Persistence
 {
 	private final Map<Block, DeathChest> deathChests = new ConcurrentHashMap<>();
 
+	public void registerDeathChest(Block firstChestBlock, DeathChest deathChest)
+	{
+		if (deathChests.containsKey(firstChestBlock))
+		{
+			throw new IllegalStateException("A death chest is already present at location " +
+					firstChestBlock.toString());
+		}
+
+		deathChests.put(firstChestBlock, deathChest);
+	}
+
 	public DeathChest getDeathChest(Block block)
 	{
 		return deathChests.get(block);
