@@ -39,88 +39,78 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
+import com.griefcraft.lwc.LWC;
+import com.griefcraft.lwc.LWCPlugin;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.griefcraft.lwc.LWC;
-import com.griefcraft.lwc.LWCPlugin;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
-public class DeadMansChest2 extends JavaPlugin
-{
-	private static final Logger logger = Logger.getLogger("Minecraft");
+public class DeadMansChest2 extends JavaPlugin {
+  private static final Logger logger = Logger.getLogger("Minecraft");
 
-	private final Config configuration = new Config();
+  private final Config configuration = new Config();
 
-	@Override
-	public void onDisable()
-	{
-		logger.log(Level.INFO, "[DeadMansChest2] unloaded.");
+  @Override
+  public void onDisable() {
+    logger.log(Level.INFO, "[DeadMansChest2] unloaded.");
+  }
 
-	}
+  @Override
+  public void onEnable() {
+    try {
+      File mainDir = new File(Constants.PLUGIN_DATA_DIRECTORY);
 
-	@Override
-	public void onEnable()
-	{
-		try
-		{
-			File mainDir = new File(Constants.PLUGIN_DATA_DIRECTORY);
+      if (!mainDir.exists() && !mainDir.mkdirs()) {
+        logger.warning(
+            "[DeadMansChest2] Could not create plugin data directory at "
+                + Constants.PLUGIN_DATA_DIRECTORY);
+      }
 
-			if (!mainDir.exists() && !mainDir.mkdirs())
-			{
-				logger.warning("[DeadMansChest2] Could not create plugin data directory at " +
-						Constants.PLUGIN_DATA_DIRECTORY);
-			}
+      File configFile = new File(mainDir + "/Config.cfg");
+      if (configFile.exists()) {
+        logger.info("[DeadMansChest2] Found configuration file at " + configFile + "; loading");
+        configuration.load(configFile);
+      } else {
+        logger.warning(
+            "[DeadMansChest2] Configuration file not found at "
+                + configFile
+                + "; creating a fresh one for you");
+        configuration.save(configFile);
+      }
 
-			File configFile = new File(mainDir + "/Config.cfg");
-			if (configFile.exists())
-			{
-				logger.info("[DeadMansChest2] Found configuration file at " + configFile + "; loading");
-				configuration.load(configFile);
-			}
-			else
-			{
-				logger.warning("[DeadMansChest2] Configuration file not found at " + configFile +
-						"; creating a fresh one for you");
-				configuration.save(configFile);
-			}
+      // TODO: Comment out when we're reasonably sure after reasonable testing that everything works
+      logger.info("[DeadMansChest2] " + ConfigDebugHelper.dumpConfig(configuration));
+    } catch (Exception e) {
+      logger.warning("[DeadMansChest2] Configuration error: " + e.getMessage());
+    }
 
-			// TODO: Comment out when we're reasonably sure after reasonable testing that everything works
-			logger.info("[DeadMansChest2] " + ConfigDebugHelper.dumpConfig(configuration));
-		}
-		catch (Exception e)
-		{
-			logger.warning("[DeadMansChest2] Configuration error: " + e.getMessage());
-		}
+    LWC lwc = null;
+    if (configuration.isLWCEnabled()) {
+      Plugin lwcPlugin = getServer().getPluginManager().getPlugin("LWC");
+      if (lwcPlugin != null) {
+        logger.info("[DeadMansChest2] LWC plugin found!");
+        lwc = ((LWCPlugin) lwcPlugin).getLWC();
+      }
+    }
 
-		LWC lwc = null;
-		if (configuration.isLWCEnabled())
-		{
-			Plugin lwcPlugin = getServer().getPluginManager().getPlugin("LWC");
-			if (lwcPlugin != null)
-			{
-				logger.info("[DeadMansChest2] LWC plugin found!");
-				lwc = ((LWCPlugin)lwcPlugin).getLWC();
-			}
-		}
+    Server server = getServer();
+    Persistence persistence = new Persistence();
+    Scheduler scheduler =
+        (task, delay) -> {
+          BukkitScheduler bukkitScheduler = server.getScheduler();
+          int taskId = bukkitScheduler.scheduleSyncDelayedTask(DeadMansChest2.this, task, delay);
+          return () -> bukkitScheduler.cancelTask(taskId);
+        };
 
-		Server server = getServer();
-		Persistence persistence = new Persistence();
-		Scheduler scheduler = (task, delay) -> {
-			BukkitScheduler bukkitScheduler = server.getScheduler();
-			int taskId = bukkitScheduler.scheduleSyncDelayedTask(DeadMansChest2.this, task, delay);
-			return () -> bukkitScheduler.cancelTask(taskId);
-		};
+    PluginManager pm = getServer().getPluginManager();
+    pm.registerEvents(new EntLis(server, configuration, persistence, lwc, scheduler), this);
+    pm.registerEvents(new CdBlockListener(configuration, persistence, lwc), this);
 
-		PluginManager pm = getServer().getPluginManager();
-		pm.registerEvents(new EntLis(server, configuration, persistence, lwc, scheduler), this);
-		pm.registerEvents(new CdBlockListener(configuration, persistence, lwc), this);
-
-		logger.info("[DeadMansChest2] loaded.");
-	}
+    logger.info("[DeadMansChest2] loaded.");
+  }
 }

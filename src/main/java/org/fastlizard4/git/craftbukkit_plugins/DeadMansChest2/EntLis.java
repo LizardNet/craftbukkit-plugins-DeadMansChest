@@ -39,12 +39,10 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
+import com.griefcraft.lwc.LWC;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.annotation.Nullable;
-
-import com.griefcraft.lwc.LWC;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Server;
@@ -58,226 +56,186 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class EntLis implements Listener
-{
-	private static final int MAX_ITEMS_PER_CHEST = 27;
-	private static final int MAX_OFFSET = 8;
-	private static final BlockFace[] HORIZONTALLY_ADJACENT = { BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH };
+public class EntLis implements Listener {
+  private static final int MAX_ITEMS_PER_CHEST = 27;
+  private static final int MAX_OFFSET = 8;
+  private static final BlockFace[] HORIZONTALLY_ADJACENT = {
+    BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH
+  };
 
-	private final Server server;
-	private final Config config;
-	private final Persistence persistence;
-	@Nullable
-	private final LWC lwc;
-	private final Scheduler scheduler;
+  private final Server server;
+  private final Config config;
+  private final Persistence persistence;
+  @Nullable private final LWC lwc;
+  private final Scheduler scheduler;
 
-	public EntLis(
-			Server server,
-			Config config,
-			Persistence persistence,
-			@Nullable LWC lwc,
-			Scheduler scheduler
-	)
-	{
-		this.server = server;
-		this.config = config;
-		this.persistence = persistence;
-		this.lwc = lwc;
-		this.scheduler = scheduler;
-	}
+  public EntLis(
+      Server server,
+      Config config,
+      Persistence persistence,
+      @Nullable LWC lwc,
+      Scheduler scheduler) {
+    this.server = server;
+    this.config = config;
+    this.persistence = persistence;
+    this.lwc = lwc;
+    this.scheduler = scheduler;
+  }
 
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onEntityDeath(EntityDeathEvent event)
-	{
-		Entity entity = event.getEntity();
-		if (!(entity instanceof Player))
-		{
-			return;
-		}
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onEntityDeath(EntityDeathEvent event) {
+    Entity entity = event.getEntity();
+    if (!(entity instanceof Player)) {
+      return;
+    }
 
-		Player player = (Player)entity;
-		if (!player.hasPermission("DeadMansChest2.chest"))
-		{
-			return;
-		}
+    Player player = (Player) entity;
+    if (!player.hasPermission("DeadMansChest2.chest")) {
+      return;
+    }
 
-		List<ItemStack> drops = event.getDrops();
-		if (isEmpty(drops))
-		{
-			return;
-		}
+    List<ItemStack> drops = event.getDrops();
+    if (isEmpty(drops)) {
+      return;
+    }
 
-		int chestsToDeploy;
-		if (config.isNeedChestInInventory() && !player.hasPermission("DeadMansChest2.freechest"))
-		{
-			int chestCount = countChests(drops);
-			if (chestCount == 0)
-			{
-				return;
-			}
-			chestsToDeploy = 1;
-			int tentativeItemCount = countStacks(drops, 1);
-			if (chestCount > 1 && tentativeItemCount > MAX_ITEMS_PER_CHEST && player.hasPermission("DeadMansChest2.doublechest"))
-			{
-				chestsToDeploy = 2;
-			}
-			removeChests(drops, chestsToDeploy);
-		}
-		else
-		{
-			if (countStacks(drops, 0) > MAX_ITEMS_PER_CHEST && player.hasPermission("DeadMansChest2.doublechest"))
-			{
-				chestsToDeploy = 2;
-			}
-			else
-			{
-				chestsToDeploy = 1;
-			}
-		}
+    int chestsToDeploy;
+    if (config.isNeedChestInInventory() && !player.hasPermission("DeadMansChest2.freechest")) {
+      int chestCount = countChests(drops);
+      if (chestCount == 0) {
+        return;
+      }
+      chestsToDeploy = 1;
+      int tentativeItemCount = countStacks(drops, 1);
+      if (chestCount > 1
+          && tentativeItemCount > MAX_ITEMS_PER_CHEST
+          && player.hasPermission("DeadMansChest2.doublechest")) {
+        chestsToDeploy = 2;
+      }
+      removeChests(drops, chestsToDeploy);
+    } else {
+      if (countStacks(drops, 0) > MAX_ITEMS_PER_CHEST
+          && player.hasPermission("DeadMansChest2.doublechest")) {
+        chestsToDeploy = 2;
+      } else {
+        chestsToDeploy = 1;
+      }
+    }
 
-		Block[] blocks = findOpenBlocks(player.getLocation().getBlock(), chestsToDeploy > 1);
-		if (blocks == null)
-		{
-			return;
-		}
-		Block block = blocks[0];
-		Block block2 = blocks.length > 1 ? blocks[1] : null;
+    Block[] blocks = findOpenBlocks(player.getLocation().getBlock(), chestsToDeploy > 1);
+    if (blocks == null) {
+      return;
+    }
+    Block block = blocks[0];
+    Block block2 = blocks.length > 1 ? blocks[1] : null;
 
-		DeathChest deathChest = new DeathChest(config, persistence, block, block2, drops);
+    DeathChest deathChest = new DeathChest(config, persistence, block, block2, drops);
 
-		if (!config.isDropsEnabled() && !player.hasPermission("DeadMansChest2.drops"))
-		{
-			drops.clear();
-		}
+    if (!config.isDropsEnabled() && !player.hasPermission("DeadMansChest2.drops")) {
+      drops.clear();
+    }
 
-		if (config.isDeathMessage() && player.hasPermission("DeadMansChest2.message"))
-		{
-			String positionString = block.getX() + ", " + block.getY() + ", " + block.getZ();
-			String deathMessageString = config.getDeathMessageString()
-				.replaceAll("\\{position}", positionString)
-				.replaceAll("\\{player}", player.getDisplayName());
-			for (ChatColor c : ChatColor.values())
-			{
-				if (c.isColor())
-				{
-					deathMessageString = deathMessageString.replaceAll("\\{" + c.name() + "}", c.toString());
-				}
-			}
-			this.server.broadcastMessage(deathMessageString);
-		}
+    if (config.isDeathMessage() && player.hasPermission("DeadMansChest2.message")) {
+      String positionString = block.getX() + ", " + block.getY() + ", " + block.getZ();
+      String deathMessageString =
+          config
+              .getDeathMessageString()
+              .replaceAll("\\{position}", positionString)
+              .replaceAll("\\{player}", player.getDisplayName());
+      for (ChatColor c : ChatColor.values()) {
+        if (c.isColor()) {
+          deathMessageString = deathMessageString.replaceAll("\\{" + c.name() + "}", c.toString());
+        }
+      }
+      this.server.broadcastMessage(deathMessageString);
+    }
 
-		scheduler.schedule(new CreateChest(config, lwc, scheduler, block, player, deathChest), 1);
-	}
+    scheduler.schedule(new CreateChest(config, lwc, scheduler, block, player, deathChest), 1);
+  }
 
-	@Nullable
-	private Block[] findOpenBlocks(Block searchStart, boolean needAdjacent)
-	{
-		for (int totalOffset = 0; totalOffset <= MAX_OFFSET; totalOffset++)
-		{
-			for (int xOffset = -totalOffset; xOffset <= totalOffset; xOffset++)
-			{
-				int remainingOffset = xOffset < 0 ? totalOffset + xOffset : totalOffset - xOffset;
-				for (int zOffset = -remainingOffset; zOffset <= remainingOffset; zOffset++)
-				{
-					int yOffset = zOffset < 0 ? remainingOffset + zOffset : remainingOffset - zOffset;
+  @Nullable
+  private Block[] findOpenBlocks(Block searchStart, boolean needAdjacent) {
+    for (int totalOffset = 0; totalOffset <= MAX_OFFSET; totalOffset++) {
+      for (int xOffset = -totalOffset; xOffset <= totalOffset; xOffset++) {
+        int remainingOffset = xOffset < 0 ? totalOffset + xOffset : totalOffset - xOffset;
+        for (int zOffset = -remainingOffset; zOffset <= remainingOffset; zOffset++) {
+          int yOffset = zOffset < 0 ? remainingOffset + zOffset : remainingOffset - zOffset;
 
-					Block cursor = searchStart.getRelative(xOffset, yOffset, zOffset);
-					if (!canPlaceChest(cursor))
-					{
-						continue;
-					}
-					if (!needAdjacent)
-					{
-						return new Block[] { cursor };
-					}
-					for (BlockFace direction : HORIZONTALLY_ADJACENT)
-					{
-						Block adjacent = cursor.getRelative(direction);
-						if (canPlaceChest(adjacent))
-						{
-							return new Block[] { cursor, adjacent };
-						}
-					}
-				}
-			}
-		}
-		return null;
-	}
+          Block cursor = searchStart.getRelative(xOffset, yOffset, zOffset);
+          if (!canPlaceChest(cursor)) {
+            continue;
+          }
+          if (!needAdjacent) {
+            return new Block[] {cursor};
+          }
+          for (BlockFace direction : HORIZONTALLY_ADJACENT) {
+            Block adjacent = cursor.getRelative(direction);
+            if (canPlaceChest(adjacent)) {
+              return new Block[] {cursor, adjacent};
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
 
-	private boolean canPlaceChest(Block target)
-	{
-		Block above = target.getRelative(BlockFace.UP);
-		return Constants.AIR_BLOCKS.contains(target.getType())
-				&& Constants.AIR_BLOCKS.contains(above.getType());
-	}
+  private boolean canPlaceChest(Block target) {
+    Block above = target.getRelative(BlockFace.UP);
+    return Constants.AIR_BLOCKS.contains(target.getType())
+        && Constants.AIR_BLOCKS.contains(above.getType());
+  }
 
-	private boolean isEmpty(List<ItemStack> items)
-	{
-		for (ItemStack itemStack : items)
-		{
-			if (itemStack != null && itemStack.getType() != Material.AIR)
-			{
-				return false;
-			}
-		}
-		return true;
-	}
+  private boolean isEmpty(List<ItemStack> items) {
+    for (ItemStack itemStack : items) {
+      if (itemStack != null && itemStack.getType() != Material.AIR) {
+        return false;
+      }
+    }
+    return true;
+  }
 
-	private int countChests(List<ItemStack> items)
-	{
-		int count = 0;
-		for (ItemStack itemStack : items)
-		{
-			if (itemStack != null && itemStack.getType() == Material.CHEST)
-			{
-				count += itemStack.getAmount();
-			}
-		}
-		return count;
-	}
+  private int countChests(List<ItemStack> items) {
+    int count = 0;
+    for (ItemStack itemStack : items) {
+      if (itemStack != null && itemStack.getType() == Material.CHEST) {
+        count += itemStack.getAmount();
+      }
+    }
+    return count;
+  }
 
-	private int countStacks(List<ItemStack> items, int skipChests)
-	{
-		int count = 0;
-		for (ItemStack itemStack : items)
-		{
-			if (itemStack == null)
-			{
-				continue;
-			}
-			if (itemStack.getType() == Material.CHEST)
-			{
-				skipChests -= itemStack.getAmount();
-				if (skipChests >= 0)
-				{
-					continue;
-				}
-			}
-			count++;
-		}
-		return count;
-	}
+  private int countStacks(List<ItemStack> items, int skipChests) {
+    int count = 0;
+    for (ItemStack itemStack : items) {
+      if (itemStack == null) {
+        continue;
+      }
+      if (itemStack.getType() == Material.CHEST) {
+        skipChests -= itemStack.getAmount();
+        if (skipChests >= 0) {
+          continue;
+        }
+      }
+      count++;
+    }
+    return count;
+  }
 
-	private void removeChests(List<ItemStack> items, int count)
-	{
-		Iterator<ItemStack> iter = items.iterator();
-		while (iter.hasNext() && count > 0)
-		{
-			ItemStack itemStack = iter.next();
-			if (itemStack == null || itemStack.getType() != Material.CHEST)
-			{
-				continue;
-			}
-			int newAmount = itemStack.getAmount() - count;
-			if (newAmount > 0)
-			{
-				itemStack.setAmount(newAmount);
-			}
-			else
-			{
-				count = -newAmount;
-				iter.remove();
-			}
-		}
-	}
+  private void removeChests(List<ItemStack> items, int count) {
+    Iterator<ItemStack> iter = items.iterator();
+    while (iter.hasNext() && count > 0) {
+      ItemStack itemStack = iter.next();
+      if (itemStack == null || itemStack.getType() != Material.CHEST) {
+        continue;
+      }
+      int newAmount = itemStack.getAmount() - count;
+      if (newAmount > 0) {
+        itemStack.setAmount(newAmount);
+      } else {
+        count = -newAmount;
+        iter.remove();
+      }
+    }
+  }
 }

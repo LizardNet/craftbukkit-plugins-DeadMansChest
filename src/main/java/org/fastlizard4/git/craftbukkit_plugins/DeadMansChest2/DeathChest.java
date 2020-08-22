@@ -39,14 +39,12 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
+import com.griefcraft.lwc.LWC;
+import com.griefcraft.model.Protection;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.annotation.Nullable;
-
-import com.griefcraft.lwc.LWC;
-import com.griefcraft.model.Protection;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -54,144 +52,127 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-public class DeathChest
-{
-	private final Config config;
-	private final Persistence persistence;
-	private final Block chest;
-	@Nullable
-	private final Block secondChest;
-	private final List<Block> blocks = new ArrayList<>();
-	@Nullable
-	private LWC lwc;
-	private Cancellable removalTask;
+public class DeathChest {
+  private final Config config;
+  private final Persistence persistence;
+  private final Block chest;
+  @Nullable private final Block secondChest;
+  private final List<Block> blocks = new ArrayList<>();
+  @Nullable private LWC lwc;
+  private Cancellable removalTask;
 
-	public DeathChest(Config config, Persistence persistence, Block chest, @Nullable Block secondChest, List<ItemStack> items)
-	{
-		this.config = config;
-		this.persistence = persistence;
-		this.chest = chest;
-		setBlock(chest, Material.CHEST);
-		this.secondChest = secondChest;
-		if (secondChest != null)
-		{
-			setBlock(secondChest, Material.CHEST);
-		}
+  public DeathChest(
+      Config config,
+      Persistence persistence,
+      Block chest,
+      @Nullable Block secondChest,
+      List<ItemStack> items) {
+    this.config = config;
+    this.persistence = persistence;
+    this.chest = chest;
+    setBlock(chest, Material.CHEST);
+    this.secondChest = secondChest;
+    if (secondChest != null) {
+      setBlock(secondChest, Material.CHEST);
+    }
 
-		Iterator<ItemStack> iter = items.iterator();
-		for (Inventory inventory : getInventories())
-		{
-			int remaining = 27;
-			while (iter.hasNext() && remaining > 0)
-			{
-				ItemStack itemStack = iter.next();
-				if (itemStack == null || itemStack.getType() == Material.AIR)
-				{
-					continue;
-				}
-				inventory.addItem(itemStack);
-				iter.remove();
-				remaining--;
-			}
-		}
-	}
+    Iterator<ItemStack> iter = items.iterator();
+    for (Inventory inventory : getInventories()) {
+      int remaining = 27;
+      while (iter.hasNext() && remaining > 0) {
+        ItemStack itemStack = iter.next();
+        if (itemStack == null || itemStack.getType() == Material.AIR) {
+          continue;
+        }
+        inventory.addItem(itemStack);
+        iter.remove();
+        remaining--;
+      }
+    }
+  }
 
-	public Block getChest()
-	{
-		return chest;
-	}
+  public Block getChest() {
+    return chest;
+  }
 
-	public void setBlock(Block block, Material material)
-	{
-		blocks.add(block);
-		block.setType(material);
-	}
+  public void setBlock(Block block, Material material) {
+    blocks.add(block);
+    block.setType(material);
+  }
 
-	public boolean containsBlock(Block block)
-	{
-		return blocks.contains(block);
-	}
+  public boolean containsBlock(Block block) {
+    return blocks.contains(block);
+  }
 
-	public void removeBlock(Block block)
-	{
-		if (block.equals(chest))
-		{
-			removeAll();
-			return;
-		}
-		if (blocks.contains(block))
-		{
-			block.setType(Material.AIR);
-			blocks.remove(block);
-		}
-	}
+  public void removeBlock(Block block) {
+    if (block.equals(chest)) {
+      removeAll();
+      return;
+    }
+    if (blocks.contains(block)) {
+      block.setType(Material.AIR);
+      blocks.remove(block);
+    }
+  }
 
-	public void removeAll()
-	{
-		if (lwc != null)
-		{
-			Protection protection = lwc.findProtection(chest);
-			if (protection != null)
-			{
-				protection.remove();
-			}
-		}
-		for (int i = blocks.size() - 1; i >= 0; i--)
-		{
-			blocks.get(i).setType(Material.AIR);
-		}
-		blocks.clear();
-		persistence.unregisterDeathChest(this);
-		removalTask.cancel();
-	}
+  public void removeAll() {
+    if (lwc != null) {
+      Protection protection = lwc.findProtection(chest);
+      if (protection != null) {
+        protection.remove();
+      }
+    }
+    for (int i = blocks.size() - 1; i >= 0; i--) {
+      blocks.get(i).setType(Material.AIR);
+    }
+    blocks.clear();
+    persistence.unregisterDeathChest(this);
+    removalTask.cancel();
+  }
 
-	@SuppressWarnings("deprecation")
-	public void lock(LWC lwc, String playerName)
-	{
-		this.lwc = lwc;
-		lwc.getPhysicalDatabase().registerProtection(chest.getTypeId(),
-				config.isLWCPrivateDefault() ? Protection.Type.PRIVATE : Protection.Type.PUBLIC,
-				chest.getWorld().getName(), playerName, "",
-				chest.getX(), chest.getY(), chest.getZ());
-	}
+  @SuppressWarnings("deprecation")
+  public void lock(LWC lwc, String playerName) {
+    this.lwc = lwc;
+    lwc.getPhysicalDatabase()
+        .registerProtection(
+            chest.getTypeId(),
+            config.isLWCPrivateDefault() ? Protection.Type.PRIVATE : Protection.Type.PUBLIC,
+            chest.getWorld().getName(),
+            playerName,
+            "",
+            chest.getX(),
+            chest.getY(),
+            chest.getZ());
+  }
 
-	public void scheduleRemoval(Scheduler scheduler, long delay)
-	{
-		removalTask = scheduler.schedule(this::removeAll, delay);
-	}
+  public void scheduleRemoval(Scheduler scheduler, long delay) {
+    removalTask = scheduler.schedule(this::removeAll, delay);
+  }
 
-	public void loot(PlayerInventory target)
-	{
-		for (Inventory inventory : getInventories())
-		{
-			for (ItemStack stack : inventory.getContents())
-			{
-				if (target.firstEmpty() == -1)
-				{
-					return;
-				}
-				if (stack != null)
-				{
-					target.addItem(stack);
-					inventory.removeItem(stack);
-				}
-			}
-		}
-		// we got to the end without returning, so we've fully looted the chest
-		removeAll();
-	}
+  public void loot(PlayerInventory target) {
+    for (Inventory inventory : getInventories()) {
+      for (ItemStack stack : inventory.getContents()) {
+        if (target.firstEmpty() == -1) {
+          return;
+        }
+        if (stack != null) {
+          target.addItem(stack);
+          inventory.removeItem(stack);
+        }
+      }
+    }
+    // we got to the end without returning, so we've fully looted the chest
+    removeAll();
+  }
 
-	private Inventory[] getInventories()
-	{
-		if (secondChest != null)
-		{
-			return new Inventory[] { getChestInventory(chest), getChestInventory(secondChest) };
-		}
-		return new Inventory[] { getChestInventory(chest) };
-	}
+  private Inventory[] getInventories() {
+    if (secondChest != null) {
+      return new Inventory[] {getChestInventory(chest), getChestInventory(secondChest)};
+    }
+    return new Inventory[] {getChestInventory(chest)};
+  }
 
-	private static Inventory getChestInventory(Block chestBlock)
-	{
-		return ((Chest)chestBlock.getState()).getInventory();
-	}
+  private static Inventory getChestInventory(Block chestBlock) {
+    return ((Chest) chestBlock.getState()).getInventory();
+  }
 }

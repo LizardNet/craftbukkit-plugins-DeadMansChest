@@ -39,29 +39,26 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
-import java.util.Set;
-
 import com.google.common.collect.ImmutableSet;
+import java.util.Set;
 import org.bukkit.Material;
 
-public final class Constants
-{
-	public static final String VERSION = "0.8";
-	public static final String PLUGIN_DATA_DIRECTORY = "plugins/DeadMansChest2/";
-	public static final Set<Material> AIR_BLOCKS = ImmutableSet.of(
-			Material.AIR,
-			Material.LONG_GRASS,
-			Material.SNOW,
-			Material.VINE,
-			Material.WATER_LILY,
-			Material.WATER,
-			Material.STATIONARY_WATER,
-			Material.LAVA,
-			Material.STATIONARY_LAVA
-	);
+public final class Constants {
+  public static final String VERSION = "0.8";
+  public static final String PLUGIN_DATA_DIRECTORY = "plugins/DeadMansChest2/";
+  public static final Set<Material> AIR_BLOCKS =
+      ImmutableSet.of(
+          Material.AIR,
+          Material.LONG_GRASS,
+          Material.SNOW,
+          Material.VINE,
+          Material.WATER_LILY,
+          Material.WATER,
+          Material.STATIONARY_WATER,
+          Material.LAVA,
+          Material.STATIONARY_LAVA);
 
-	private Constants()
-	{
-		throw new IllegalStateException();
-	}
+  private Constants() {
+    throw new IllegalStateException();
+  }
 }

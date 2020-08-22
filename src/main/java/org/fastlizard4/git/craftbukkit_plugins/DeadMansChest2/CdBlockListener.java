@@ -39,10 +39,9 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
-import javax.annotation.Nullable;
-
 import com.griefcraft.lwc.LWC;
 import com.griefcraft.model.Protection;
+import javax.annotation.Nullable;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -55,91 +54,73 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.inventory.PlayerInventory;
 
-public class CdBlockListener implements Listener
-{
-	private final Config config;
-	private final Persistence persistence;
-	@Nullable
-	private final LWC lwc;
+public class CdBlockListener implements Listener {
+  private final Config config;
+  private final Persistence persistence;
+  @Nullable private final LWC lwc;
 
-	public CdBlockListener(Config config, Persistence persistence, @Nullable LWC lwc)
-	{
-		this.config = config;
-		this.persistence = persistence;
-		this.lwc = lwc;
-	}
+  public CdBlockListener(Config config, Persistence persistence, @Nullable LWC lwc) {
+    this.config = config;
+    this.persistence = persistence;
+    this.lwc = lwc;
+  }
 
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onBlockBreak(BlockBreakEvent event)
-	{
-		if (event.isCancelled())
-		{
-			return;
-		}
-		if (persistence.isFakeBlock(event.getBlock()))
-		{
-			Block block = event.getBlock();
-			if (!config.isMineableDrops())
-			{
-				event.setCancelled(true);
-			}
-			persistence.removeAndUnregisterFakeBlock(block);
-		}
-	}
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onBlockBreak(BlockBreakEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
+    if (persistence.isFakeBlock(event.getBlock())) {
+      Block block = event.getBlock();
+      if (!config.isMineableDrops()) {
+        event.setCancelled(true);
+      }
+      persistence.removeAndUnregisterFakeBlock(block);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onBlockPistonRetract(BlockPistonRetractEvent event)
-	{
-		if (event.isCancelled())
-		{
-			return;
-		}
-		if (persistence.isFakeBlock(event.getBlock()) && !config.isMineableDrops())
-		{
-			event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onBlockPistonRetract(BlockPistonRetractEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
+    if (persistence.isFakeBlock(event.getBlock()) && !config.isMineableDrops()) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onBlockPistonExtend(BlockPistonExtendEvent event)
-	{
-		if (event.isCancelled())
-		{
-			return;
-		}
-		if (persistence.isFakeBlock(event.getBlock()) && !config.isMineableDrops())
-		{
-			event.setCancelled(true);
-		}
-	}
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onBlockPistonExtend(BlockPistonExtendEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
+    if (persistence.isFakeBlock(event.getBlock()) && !config.isMineableDrops()) {
+      event.setCancelled(true);
+    }
+  }
 
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onBlockDamage(BlockDamageEvent event)
-	{
-		if (!config.isChestLoot())
-		{
-			return;
-		}
-		Player player = event.getPlayer();
-		Block block = event.getBlock();
-		if (!player.isSneaking() || block.getType() != Material.CHEST)
-		{
-			return;
-		}
-		if (!persistence.isDeathChest(block))
-		{
-			return;
-		}
-		if (lwc != null)
-		{
-			Protection protection = lwc.findProtection(block);
-			if (protection.getType() == Protection.Type.PRIVATE
-					&& !protection.isOwner(player) && !player.hasPermission("DeadMansChest2.loot"))
-			{
-				return;
-			}
-		}
-		PlayerInventory pi = player.getInventory();
-		persistence.getDeathChest(block).loot(pi);
-	}
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onBlockDamage(BlockDamageEvent event) {
+    if (!config.isChestLoot()) {
+      return;
+    }
+    Player player = event.getPlayer();
+    Block block = event.getBlock();
+    if (!player.isSneaking() || block.getType() != Material.CHEST) {
+      return;
+    }
+    if (!persistence.isDeathChest(block)) {
+      return;
+    }
+    if (lwc != null) {
+      Protection protection = lwc.findProtection(block);
+      if (protection.getType() == Protection.Type.PRIVATE
+          && !protection.isOwner(player)
+          && !player.hasPermission("DeadMansChest2.loot")) {
+        return;
+      }
+    }
+    PlayerInventory pi = player.getInventory();
+    persistence.getDeathChest(block).loot(pi);
+  }
 }

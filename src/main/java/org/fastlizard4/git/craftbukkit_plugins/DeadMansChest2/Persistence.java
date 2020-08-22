@@ -42,44 +42,34 @@ package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.bukkit.block.Block;
 
-public class Persistence
-{
-	private final Map<Block, DeathChest> deathChests = new ConcurrentHashMap<>();
+public class Persistence {
+  private final Map<Block, DeathChest> deathChests = new ConcurrentHashMap<>();
 
-	public DeathChest getDeathChest(Block block)
-	{
-		return deathChests.get(block);
-	}
+  public DeathChest getDeathChest(Block block) {
+    return deathChests.get(block);
+  }
 
-	public void removeAndUnregisterFakeBlock(Block block)
-	{
-		for (DeathChest deathChest : listDeathChests())
-		{
-			deathChest.removeBlock(block);
-		}
-	}
+  public void removeAndUnregisterFakeBlock(Block block) {
+    for (DeathChest deathChest : listDeathChests()) {
+      deathChest.removeBlock(block);
+    }
+  }
 
-	public boolean isFakeBlock(Block block)
-	{
-		return listDeathChests().stream()
-				.anyMatch(chest -> chest.containsBlock(block));
-	}
+  public boolean isFakeBlock(Block block) {
+    return listDeathChests().stream().anyMatch(chest -> chest.containsBlock(block));
+  }
 
-	public void unregisterDeathChest(DeathChest chest)
-	{
-		deathChests.remove(chest.getChest());
-	}
+  public void unregisterDeathChest(DeathChest chest) {
+    deathChests.remove(chest.getChest());
+  }
 
-	public boolean isDeathChest(Block block)
-	{
-		return deathChests.containsKey(block);
-	}
+  public boolean isDeathChest(Block block) {
+    return deathChests.containsKey(block);
+  }
 
-	private Collection<DeathChest> listDeathChests()
-	{
-		return deathChests.values();
-	}
+  private Collection<DeathChest> listDeathChests() {
+    return deathChests.values();
+  }
 }

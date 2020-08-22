@@ -50,257 +50,221 @@ import java.math.BigDecimal;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-public class Config
-{
-	private static final Logger logger = Logger.getLogger("Minecraft");
+public class Config {
+  private static final Logger logger = Logger.getLogger("Minecraft");
 
-	@ConfigDescription("Do players need a chest in their inventory to get a death chest?")
-	private boolean NeedChestInInventory = false;
-	@ConfigDescription("Should we lock chests with LWC?")
-	private boolean LWCEnabled = true;
-	@ConfigDescription("Should the glowstone, chest and sign drop their respective items when mined?")
-	private boolean MineableDrops = false;
-	@ConfigDescription("Should we build a glowstone tower?")
-	private boolean BeaconEnabled = true;
-	@ConfigDescription("And how high?")
-	private int BeaconHeight = 10;
-	@ConfigDescription("Should the beacon replace water/lava blocks as well or just air blocks?")
-	private boolean BeaconReplacesLiquid = true;
-	@ConfigDescription("Should we show a death message?")
-	private boolean DeathMessage = true;
-	@ConfigDescription("Put a sign on the chest with the player name?")
-	private boolean SignOnChest = true;
-	@ConfigDescription("If we are using LWC to lock the chest should it be a private lock or a public lock?")
-	private boolean LWCPrivateDefault = true;
-	@ConfigDescription("If death messages are enabled, the string to display")
-	private String DeathMessageString = "died. Deploying death chest.";
-	@ConfigDescription("How long, in seconds, before the chest disappears and the items spill out?")
-	private int ChestDeleteInterval = 3600;
-	@ConfigDescription("Should we drop items that don't fit into the chest (true), or just remove them from the world (false)?")
-	private boolean DropsEnabled = true;
-	@ConfigDescription("Should we delete the chests after a certain time frame?")
-	private boolean ChestDeleteIntervalEnabled = false;
-	@ConfigDescription("Should players be allowed to loot death chests when they sneak click on one?")
-	private boolean ChestLoot = false;
+  @ConfigDescription("Do players need a chest in their inventory to get a death chest?")
+  private boolean NeedChestInInventory = false;
 
-	public void load(File configFile) throws IOException
-	{
-		try (
-				FileInputStream in = new FileInputStream(configFile)
-		)
-		{
-			Properties prop = new Properties();
-			prop.load(in);
+  @ConfigDescription("Should we lock chests with LWC?")
+  private boolean LWCEnabled = true;
 
-			for (Field field : Config.class.getDeclaredFields())
-			{
-				if (Modifier.isStatic(field.getModifiers()))
-				{
-					continue;
-				}
-				field.setAccessible(true);
+  @ConfigDescription("Should the glowstone, chest and sign drop their respective items when mined?")
+  private boolean MineableDrops = false;
 
-				String value = prop.getProperty(field.getName());
-				if (value == null)
-				{
-					continue;
-				}
+  @ConfigDescription("Should we build a glowstone tower?")
+  private boolean BeaconEnabled = true;
 
-				Class<?> type = field.getType();
-				if (String.class.isAssignableFrom(type))
-				{
-					field.set(this, value);
-				}
-				else if (int.class.isAssignableFrom(type))
-				{
-					field.setInt(this, Integer.parseInt(value));
-				}
-				else if (boolean.class.isAssignableFrom(type))
-				{
-					field.setBoolean(this, Boolean.parseBoolean(value));
-				}
-			}
-			if (new BigDecimal(prop.getProperty("version", "0")).compareTo(new BigDecimal(Constants.VERSION)) < 0)
-			{
-				save(configFile);
-			}
-		}
-		catch (IllegalAccessException e)
-		{
-			logger.warning("Access error loading config: " + e.getMessage());
-			e.printStackTrace();
-		}
-	}
+  @ConfigDescription("And how high?")
+  private int BeaconHeight = 10;
 
-	public void save(File configFile) throws IOException
-	{
-		try (
-				FileWriter fw = new FileWriter(configFile);
-				BufferedWriter outChannel = new BufferedWriter(fw)
-		)
-		{
-			outChannel.write("# DeadMansChest2 configuration\n" +
-					"version=" + Constants.VERSION + "\n");
+  @ConfigDescription("Should the beacon replace water/lava blocks as well or just air blocks?")
+  private boolean BeaconReplacesLiquid = true;
 
-			for (Field field : Config.class.getDeclaredFields())
-			{
-				if (Modifier.isStatic(field.getModifiers()))
-				{
-					continue;
-				}
-				field.setAccessible(true);
-				ConfigDescription description = field.getAnnotation(ConfigDescription.class);
-				if (description != null)
-				{
-					outChannel.write("# " + description.value() + "\n");
-				}
-				outChannel.write(field.getName() + "=" + field.get(this) + "\n");
-			}
-		}
-		catch (IllegalAccessException e)
-		{
-			logger.warning("Access error saving config: " + e.getMessage());
-			e.printStackTrace();
-		}
-	}
+  @ConfigDescription("Should we show a death message?")
+  private boolean DeathMessage = true;
 
-	public boolean isDropsEnabled()
-	{
-		return DropsEnabled;
-	}
+  @ConfigDescription("Put a sign on the chest with the player name?")
+  private boolean SignOnChest = true;
 
-	public void setDropsEnabled(boolean dropsEnabled)
-	{
-		this.DropsEnabled = dropsEnabled;
-	}
+  @ConfigDescription(
+      "If we are using LWC to lock the chest should it be a private lock or a public lock?")
+  private boolean LWCPrivateDefault = true;
 
-	public boolean isMineableDrops()
-	{
-		return MineableDrops;
-	}
+  @ConfigDescription("If death messages are enabled, the string to display")
+  private String DeathMessageString = "died. Deploying death chest.";
 
-	public void setMineableDrops(boolean mineableDrops)
-	{
-		this.MineableDrops = mineableDrops;
-	}
+  @ConfigDescription("How long, in seconds, before the chest disappears and the items spill out?")
+  private int ChestDeleteInterval = 3600;
 
-	public boolean isDeathMessage()
-	{
-		return DeathMessage;
-	}
+  @ConfigDescription(
+      "Should we drop items that don't fit into the chest (true), or just remove them from the"
+          + " world (false)?")
+  private boolean DropsEnabled = true;
 
-	public void setDeathMessage(boolean deathMessage)
-	{
-		this.DeathMessage = deathMessage;
-	}
+  @ConfigDescription("Should we delete the chests after a certain time frame?")
+  private boolean ChestDeleteIntervalEnabled = false;
 
-	public String getDeathMessageString()
-	{
-		return DeathMessageString;
-	}
+  @ConfigDescription("Should players be allowed to loot death chests when they sneak click on one?")
+  private boolean ChestLoot = false;
 
-	public void setDeathMessageString(String deathMessageString)
-	{
-		this.DeathMessageString = deathMessageString;
-	}
+  public void load(File configFile) throws IOException {
+    try (FileInputStream in = new FileInputStream(configFile)) {
+      Properties prop = new Properties();
+      prop.load(in);
 
-	public boolean isSignOnChest()
-	{
-		return SignOnChest;
-	}
+      for (Field field : Config.class.getDeclaredFields()) {
+        if (Modifier.isStatic(field.getModifiers())) {
+          continue;
+        }
+        field.setAccessible(true);
 
-	public void setSignOnChest(boolean signOnChest)
-	{
-		SignOnChest = signOnChest;
-	}
+        String value = prop.getProperty(field.getName());
+        if (value == null) {
+          continue;
+        }
 
-	public boolean isLWCEnabled()
-	{
-		return LWCEnabled;
-	}
+        Class<?> type = field.getType();
+        if (String.class.isAssignableFrom(type)) {
+          field.set(this, value);
+        } else if (int.class.isAssignableFrom(type)) {
+          field.setInt(this, Integer.parseInt(value));
+        } else if (boolean.class.isAssignableFrom(type)) {
+          field.setBoolean(this, Boolean.parseBoolean(value));
+        }
+      }
+      if (new BigDecimal(prop.getProperty("version", "0"))
+              .compareTo(new BigDecimal(Constants.VERSION))
+          < 0) {
+        save(configFile);
+      }
+    } catch (IllegalAccessException e) {
+      logger.warning("Access error loading config: " + e.getMessage());
+      e.printStackTrace();
+    }
+  }
 
-	public void setLWCEnabled(boolean LWCEnabled)
-	{
-		this.LWCEnabled = LWCEnabled;
-	}
+  public void save(File configFile) throws IOException {
+    try (FileWriter fw = new FileWriter(configFile);
+        BufferedWriter outChannel = new BufferedWriter(fw)) {
+      outChannel.write("# DeadMansChest2 configuration\n" + "version=" + Constants.VERSION + "\n");
 
-	public boolean isLWCPrivateDefault()
-	{
-		return LWCPrivateDefault;
-	}
+      for (Field field : Config.class.getDeclaredFields()) {
+        if (Modifier.isStatic(field.getModifiers())) {
+          continue;
+        }
+        field.setAccessible(true);
+        ConfigDescription description = field.getAnnotation(ConfigDescription.class);
+        if (description != null) {
+          outChannel.write("# " + description.value() + "\n");
+        }
+        outChannel.write(field.getName() + "=" + field.get(this) + "\n");
+      }
+    } catch (IllegalAccessException e) {
+      logger.warning("Access error saving config: " + e.getMessage());
+      e.printStackTrace();
+    }
+  }
 
-	public void setLWCPrivateDefault(boolean LWCPrivateDefault)
-	{
-		this.LWCPrivateDefault = LWCPrivateDefault;
-	}
+  public boolean isDropsEnabled() {
+    return DropsEnabled;
+  }
 
-	public boolean isBeaconEnabled()
-	{
-		return BeaconEnabled;
-	}
+  public void setDropsEnabled(boolean dropsEnabled) {
+    this.DropsEnabled = dropsEnabled;
+  }
 
-	public void setBeaconEnabled(boolean beaconEnabled)
-	{
-		BeaconEnabled = beaconEnabled;
-	}
+  public boolean isMineableDrops() {
+    return MineableDrops;
+  }
 
-	public int getBeaconHeight()
-	{
-		return BeaconHeight;
-	}
+  public void setMineableDrops(boolean mineableDrops) {
+    this.MineableDrops = mineableDrops;
+  }
 
-	public void setBeaconHeight(int beaconHeight)
-	{
-		BeaconHeight = beaconHeight;
-	}
+  public boolean isDeathMessage() {
+    return DeathMessage;
+  }
 
-	public boolean isBeaconReplacesLiquid()
-	{
-		return BeaconReplacesLiquid;
-	}
+  public void setDeathMessage(boolean deathMessage) {
+    this.DeathMessage = deathMessage;
+  }
 
-	public void setBeaconReplacesLiquid(boolean beaconReplacesLiquid)
-	{
-		BeaconReplacesLiquid = beaconReplacesLiquid;
-	}
+  public String getDeathMessageString() {
+    return DeathMessageString;
+  }
 
-	public int getChestDeleteInterval()
-	{
-		return ChestDeleteInterval;
-	}
+  public void setDeathMessageString(String deathMessageString) {
+    this.DeathMessageString = deathMessageString;
+  }
 
-	public void setChestDeleteInterval(int chestDeleteInterval)
-	{
-		ChestDeleteInterval = chestDeleteInterval;
-	}
+  public boolean isSignOnChest() {
+    return SignOnChest;
+  }
 
-	public boolean isChestDeleteIntervalEnabled()
-	{
-		return ChestDeleteIntervalEnabled;
-	}
+  public void setSignOnChest(boolean signOnChest) {
+    SignOnChest = signOnChest;
+  }
 
-	public void setChestDeleteIntervalEnabled(boolean chestDeleteIntervalEnabled)
-	{
-		ChestDeleteIntervalEnabled = chestDeleteIntervalEnabled;
-	}
+  public boolean isLWCEnabled() {
+    return LWCEnabled;
+  }
 
-	public boolean isChestLoot()
-	{
-		return ChestLoot;
-	}
+  public void setLWCEnabled(boolean LWCEnabled) {
+    this.LWCEnabled = LWCEnabled;
+  }
 
-	public void setChestLoot(boolean chestLoot)
-	{
-		ChestLoot = chestLoot;
-	}
+  public boolean isLWCPrivateDefault() {
+    return LWCPrivateDefault;
+  }
 
-	public boolean isNeedChestInInventory()
-	{
-		return NeedChestInInventory;
-	}
+  public void setLWCPrivateDefault(boolean LWCPrivateDefault) {
+    this.LWCPrivateDefault = LWCPrivateDefault;
+  }
 
-	public void setNeedChestInInventory(boolean needChestInInventory)
-	{
-		this.NeedChestInInventory = needChestInInventory;
-	}
+  public boolean isBeaconEnabled() {
+    return BeaconEnabled;
+  }
+
+  public void setBeaconEnabled(boolean beaconEnabled) {
+    BeaconEnabled = beaconEnabled;
+  }
+
+  public int getBeaconHeight() {
+    return BeaconHeight;
+  }
+
+  public void setBeaconHeight(int beaconHeight) {
+    BeaconHeight = beaconHeight;
+  }
+
+  public boolean isBeaconReplacesLiquid() {
+    return BeaconReplacesLiquid;
+  }
+
+  public void setBeaconReplacesLiquid(boolean beaconReplacesLiquid) {
+    BeaconReplacesLiquid = beaconReplacesLiquid;
+  }
+
+  public int getChestDeleteInterval() {
+    return ChestDeleteInterval;
+  }
+
+  public void setChestDeleteInterval(int chestDeleteInterval) {
+    ChestDeleteInterval = chestDeleteInterval;
+  }
+
+  public boolean isChestDeleteIntervalEnabled() {
+    return ChestDeleteIntervalEnabled;
+  }
+
+  public void setChestDeleteIntervalEnabled(boolean chestDeleteIntervalEnabled) {
+    ChestDeleteIntervalEnabled = chestDeleteIntervalEnabled;
+  }
+
+  public boolean isChestLoot() {
+    return ChestLoot;
+  }
+
+  public void setChestLoot(boolean chestLoot) {
+    ChestLoot = chestLoot;
+  }
+
+  public boolean isNeedChestInInventory() {
+    return NeedChestInInventory;
+  }
+
+  public void setNeedChestInInventory(boolean needChestInInventory) {
+    this.NeedChestInInventory = needChestInInventory;
+  }
 }

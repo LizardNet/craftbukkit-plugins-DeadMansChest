@@ -40,7 +40,6 @@
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
 @FunctionalInterface
-public interface Cancellable
-{
-	void cancel();
+public interface Cancellable {
+  void cancel();
 }
