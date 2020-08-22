@@ -60,7 +60,7 @@ public class DeathChest {
   @Nullable private final Block secondChest;
   private final List<Block> blocks = new ArrayList<>();
   @Nullable private LWC lwc;
-  private Cancellable removalTask;
+  @Nullable private Cancellable removalTask;
 
   public DeathChest(
       Config config,
@@ -130,7 +130,9 @@ public class DeathChest {
         protection.remove();
       }
     }
-    removalTask.cancel();
+    if (removalTask != null) {
+      removalTask.cancel();
+    }
     persistence.unregisterDeathChest(this);
     for (int i = blocks.size() - 1; i >= 0; i--) {
       blocks.get(i).setType(Material.AIR);
