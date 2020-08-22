@@ -150,7 +150,7 @@ public class EntLis implements Listener {
       this.server.broadcastMessage(deathMessageString);
     }
 
-    scheduler.schedule(new CreateChest(config, lwc, scheduler, block, player, deathChest), 1);
+    scheduler.schedule(new CreateChest(config, lwc, persistence, scheduler, block, player, deathChest), 1);
   }
 
   @Nullable

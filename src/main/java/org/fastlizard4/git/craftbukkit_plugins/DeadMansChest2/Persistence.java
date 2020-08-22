@@ -40,36 +40,75 @@
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.block.Block;
 
 public class Persistence {
-  private final Map<Block, DeathChest> deathChests = new ConcurrentHashMap<>();
+  /**
+   * Authoritative set of death chests. This is a prime target for storing to disk or to a database.
+   */
+  private final Set<DeathChest> deathChests = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-  public DeathChest getDeathChest(Block block) {
-    return deathChests.get(block);
+  /**
+   * Convenience mapping to look up which death chest is associated with a given block.
+   */
+  private final Map<Block, DeathChest> deathChestsByBlock = new ConcurrentHashMap<>();
+
+  /**
+   * Convenience mapping to look up which death chest is associated with a given block, containing
+   * only those blocks which can be clicked to loot the death chest.
+   */
+  private final Map<Block, DeathChest> deathChestsByLootableBlock = new ConcurrentHashMap<>();
+
+  /**
+   * Creates a new instance with no registered death chests.
+   */
+  public Persistence() {
   }
 
-  public void removeAndUnregisterFakeBlock(Block block) {
-    for (DeathChest deathChest : listDeathChests()) {
-      deathChest.removeBlock(block);
-    }
+  /**
+   * Creates a new instance with a collection of existing known death chests.
+   */
+  public Persistence(Collection<DeathChest> deathChests) {
+    deathChests.forEach(this::registerDeathChest);
   }
 
-  public boolean isFakeBlock(Block block) {
-    return listDeathChests().stream().anyMatch(chest -> chest.containsBlock(block));
+  /**
+   * Registers a new death chest with this instance. The provided death chest must not be modified
+   * after calling this method; use {@link #removeAndUnregisterFakeBlock(Block)} to remove blocks.
+   */
+  public void registerDeathChest(DeathChest chest) {
+    deathChests.add(chest);
+    chest.getBlocks().forEach(block -> deathChestsByBlock.put(block, chest));
+    chest.getLootableBlocks().forEach(block -> deathChestsByLootableBlock.put(block, chest));
   }
 
   public void unregisterDeathChest(DeathChest chest) {
-    deathChests.remove(chest.getChest());
+    deathChests.remove(chest);
+    chest.getBlocks().forEach(deathChestsByBlock::remove);
+    chest.getLootableBlocks().forEach(deathChestsByLootableBlock::remove);
   }
 
-  public boolean isDeathChest(Block block) {
-    return deathChests.containsKey(block);
+  public boolean isFakeBlock(Block block) {
+    return deathChestsByBlock.containsKey(block);
   }
 
-  private Collection<DeathChest> listDeathChests() {
-    return deathChests.values();
+  public void removeAndUnregisterFakeBlock(Block block) {
+    DeathChest chest = deathChestsByBlock.get(block);
+    if (chest != null) {
+      chest.removeBlock(block);
+    }
+    deathChestsByBlock.remove(block);
+  }
+
+  public boolean isLootableBlock(Block block) {
+    return deathChestsByLootableBlock.containsKey(block);
+  }
+
+  public DeathChest getDeathChestByLootableBlock(Block block) {
+    return deathChestsByLootableBlock.get(block);
   }
 }

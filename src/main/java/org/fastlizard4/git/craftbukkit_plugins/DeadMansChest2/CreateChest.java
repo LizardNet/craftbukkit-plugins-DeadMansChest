@@ -51,6 +51,7 @@ import org.bukkit.entity.Player;
 public class CreateChest implements Runnable {
   private final Config config;
   @Nullable private final LWC lwc;
+  private final Persistence persistence;
   private final Scheduler scheduler;
 
   private final Block chestblock;
@@ -60,12 +61,14 @@ public class CreateChest implements Runnable {
   public CreateChest(
       Config config,
       @Nullable LWC lwc,
+      Persistence persistence,
       Scheduler scheduler,
       Block chestblock,
       Player player,
       DeathChest deathChest) {
     this.config = config;
     this.lwc = lwc;
+    this.persistence = persistence;
     this.scheduler = scheduler;
     this.chestblock = chestblock;
     this.player = player;
@@ -158,6 +161,8 @@ public class CreateChest implements Runnable {
         nextblock = nextblock.getRelative(BlockFace.UP);
       }
     }
+
+    persistence.registerDeathChest(deathChest);
 
     if (config.isChestDeleteIntervalEnabled() && !player.hasPermission("DeadMansChest2.nodelete")) {
       int delay = config.getChestDeleteInterval() * 20;

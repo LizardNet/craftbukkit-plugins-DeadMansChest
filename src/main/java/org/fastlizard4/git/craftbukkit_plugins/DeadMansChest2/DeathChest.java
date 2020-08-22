@@ -39,6 +39,7 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
+import com.google.common.collect.ImmutableList;
 import com.griefcraft.lwc.LWC;
 import com.griefcraft.model.Protection;
 import java.util.ArrayList;
@@ -91,8 +92,15 @@ public class DeathChest {
     }
   }
 
-  public Block getChest() {
-    return chest;
+  public List<Block> getBlocks() {
+    return blocks;
+  }
+
+  public List<Block> getLootableBlocks() {
+    if (secondChest == null) {
+      return ImmutableList.of(chest);
+    }
+    return ImmutableList.of(chest, secondChest);
   }
 
   public void setBlock(Block block, Material material) {
@@ -122,12 +130,12 @@ public class DeathChest {
         protection.remove();
       }
     }
+    removalTask.cancel();
+    persistence.unregisterDeathChest(this);
     for (int i = blocks.size() - 1; i >= 0; i--) {
       blocks.get(i).setType(Material.AIR);
     }
     blocks.clear();
-    persistence.unregisterDeathChest(this);
-    removalTask.cancel();
   }
 
   @SuppressWarnings("deprecation")

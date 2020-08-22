@@ -109,7 +109,7 @@ public class CdBlockListener implements Listener {
     if (!player.isSneaking() || block.getType() != Material.CHEST) {
       return;
     }
-    if (!persistence.isDeathChest(block)) {
+    if (!persistence.isLootableBlock(block)) {
       return;
     }
     if (lwc != null) {
@@ -121,6 +121,6 @@ public class CdBlockListener implements Listener {
       }
     }
     PlayerInventory pi = player.getInventory();
-    persistence.getDeathChest(block).loot(pi);
+    persistence.getDeathChestByLootableBlock(block).loot(pi);
   }
 }
