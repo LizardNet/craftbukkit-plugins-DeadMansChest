@@ -44,8 +44,11 @@ import com.griefcraft.model.Protection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.bukkit.Material;
@@ -59,7 +62,7 @@ public class DeathChest {
   @Nullable private final LWC lwc;
   private final Persistence persistence;
   private final List<Block> chestBlocks = new ArrayList<>();
-  private final List<Block> blocks = new ArrayList<>();
+  private final Map<Block, Material> replacedBlocks = new HashMap<>();
   @Nullable private Cancellable removalTask;
 
   /**
@@ -95,8 +98,8 @@ public class DeathChest {
     }
   }
 
-  public List<Block> getBlocks() {
-    return Collections.unmodifiableList(blocks);
+  public Set<Block> getBlocks() {
+    return replacedBlocks.keySet();
   }
 
   public List<Block> getLootableBlocks() {
@@ -104,7 +107,9 @@ public class DeathChest {
   }
 
   public void setBlock(Block block, Material material) {
-    blocks.add(block);
+    if (!replacedBlocks.containsKey(block)) {
+      replacedBlocks.put(block, block.getType());
+    }
     block.setType(material);
   }
 
@@ -115,9 +120,9 @@ public class DeathChest {
         protection.remove();
       }
     }
-    if (blocks.contains(block)) {
-      block.setType(Material.AIR);
-      blocks.remove(block);
+    if (replacedBlocks.containsKey(block)) {
+      block.setType(replacedBlocks.get(block));
+      replacedBlocks.remove(block);
     }
     chestBlocks.remove(block);
     if (chestBlocks.isEmpty()) {
@@ -130,11 +135,11 @@ public class DeathChest {
       removalTask.cancel();
     }
     persistence.unregisterDeathChest(this);
-    for (int i = blocks.size() - 1; i >= 0; i--) {
-      blocks.get(i).setType(Material.AIR);
+    for (Map.Entry<Block, Material> entry : replacedBlocks.entrySet()) {
+      entry.getKey().setType(entry.getValue());
     }
     chestBlocks.clear();
-    blocks.clear();
+    replacedBlocks.clear();
   }
 
   public void scheduleRemoval(Scheduler scheduler, long delay) {
