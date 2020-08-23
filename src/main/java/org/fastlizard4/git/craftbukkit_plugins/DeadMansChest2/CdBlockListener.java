@@ -50,9 +50,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.material.Sign;
 
 public class CdBlockListener implements Listener {
   private final Config config;
@@ -122,5 +124,30 @@ public class CdBlockListener implements Listener {
     }
     PlayerInventory pi = player.getInventory();
     persistence.getDeathChestByLootableBlock(block).loot(pi);
+  }
+
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onBlockPhysics(BlockPhysicsEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
+    Block block = event.getBlock();
+    if (persistence.isFakeBlock(block) && !config.isMineableDrops()) {
+      if (isUnsupportedSign(block)) {
+        event.setCancelled(true);
+      }
+    }
+  }
+
+  private boolean isUnsupportedSign(Block block) {
+    Material type = block.getType();
+    if (type == Material.WALL_SIGN || type == Material.SIGN_POST) {
+      Sign sign = (Sign) block.getState().getData();
+      Material attached = block.getRelative(sign.getAttachedFace()).getType();
+      if (attached.isTransparent()) {
+        return true;
+      }
+    }
+    return false;
   }
 }
