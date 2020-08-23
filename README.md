@@ -1,7 +1,7 @@
 DeadMansChest2
 ==============
 
-* LizardNet Code Review to GitHub Mirroring Status: [![LizardNet Code Review to GitHub Mirroring Status](https://integration.fastlizard4.org:444/jenkins/buildStatus/icon?job=craftbukkit-plugins-DeadMansChest github mirror)](https://integration.fastlizard4.org:444/jenkins/job/craftbukkit-plugins-DeadMansChest%20github%20mirror/)
+* LizardNet Code Review to GitHub Mirroring Status: [![LizardNet Code Review to GitHub Mirroring Status](https://integration.fastlizard4.org:444/jenkins/buildStatus/icon?job=craftbukkit-plugins-DeadMansChest%20github%20mirror)](https://integration.fastlizard4.org:444/jenkins/job/craftbukkit-plugins-DeadMansChest%20github%20mirror/)
 * Jenkins Autobuild Status: [![Jenkins Autobuild Status](https://integration.fastlizard4.org:444/jenkins/buildStatus/icon?job=craftbukkit-plugins-DeadMansChest)](https://integration.fastlizard4.org:444/jenkins/job/craftbukkit-plugins-DeadMansChest/)
 
 **Warning: This plugin is still in development.  Use at your own risk.  It is
