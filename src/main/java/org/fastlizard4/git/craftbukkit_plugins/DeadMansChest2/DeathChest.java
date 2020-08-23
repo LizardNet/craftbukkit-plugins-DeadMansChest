@@ -39,12 +39,14 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
-import com.google.common.collect.ImmutableList;
 import com.griefcraft.lwc.LWC;
 import com.griefcraft.model.Protection;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -54,32 +56,33 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 public class DeathChest {
-  private final Config config;
+  @Nullable private final LWC lwc;
   private final Persistence persistence;
-  private final Block chest;
-  @Nullable private final Block secondChest;
+  private final List<Block> chestBlocks = new ArrayList<>();
   private final List<Block> blocks = new ArrayList<>();
-  @Nullable private LWC lwc;
   @Nullable private Cancellable removalTask;
 
+  /**
+   * Creates a new instance that, when removed, will unregister itself with the given Persistence
+   * instance. The new chest blocks will be created and filled synchronously in the constructor, and
+   * the list of items will be mutated to remove items that have been placed in the chests.
+   */
   public DeathChest(
-      Config config,
+      LWC lwc,
       Persistence persistence,
-      Block chest,
-      @Nullable Block secondChest,
+      Collection<Block> chestBlocks,
       List<ItemStack> items) {
-    this.config = config;
+    this.lwc = lwc;
     this.persistence = persistence;
-    this.chest = chest;
-    setBlock(chest, Material.CHEST);
-    this.secondChest = secondChest;
-    if (secondChest != null) {
-      setBlock(secondChest, Material.CHEST);
+    this.chestBlocks.addAll(chestBlocks);
+
+    for (Block chestBlock : chestBlocks) {
+      setBlock(chestBlock, Material.CHEST);
     }
 
     Iterator<ItemStack> iter = items.iterator();
     for (Inventory inventory : getInventories()) {
-      int remaining = 27;
+      int remaining = Constants.MAX_ITEMS_PER_CHEST;
       while (iter.hasNext() && remaining > 0) {
         ItemStack itemStack = iter.next();
         if (itemStack == null || itemStack.getType() == Material.AIR) {
@@ -93,14 +96,11 @@ public class DeathChest {
   }
 
   public List<Block> getBlocks() {
-    return blocks;
+    return Collections.unmodifiableList(blocks);
   }
 
   public List<Block> getLootableBlocks() {
-    if (secondChest == null) {
-      return ImmutableList.of(chest);
-    }
-    return ImmutableList.of(chest, secondChest);
+    return Collections.unmodifiableList(chestBlocks);
   }
 
   public void setBlock(Block block, Material material) {
@@ -108,28 +108,24 @@ public class DeathChest {
     block.setType(material);
   }
 
-  public boolean containsBlock(Block block) {
-    return blocks.contains(block);
-  }
-
   public void removeBlock(Block block) {
-    if (block.equals(chest)) {
-      removeAll();
-      return;
+    if (chestBlocks.contains(block) && lwc != null) {
+      Protection protection = lwc.findProtection(block);
+      if (protection != null) {
+        protection.remove();
+      }
     }
     if (blocks.contains(block)) {
       block.setType(Material.AIR);
       blocks.remove(block);
     }
+    chestBlocks.remove(block);
+    if (chestBlocks.isEmpty()) {
+      removeAll();
+    }
   }
 
   public void removeAll() {
-    if (lwc != null) {
-      Protection protection = lwc.findProtection(chest);
-      if (protection != null) {
-        protection.remove();
-      }
-    }
     if (removalTask != null) {
       removalTask.cancel();
     }
@@ -137,22 +133,8 @@ public class DeathChest {
     for (int i = blocks.size() - 1; i >= 0; i--) {
       blocks.get(i).setType(Material.AIR);
     }
+    chestBlocks.clear();
     blocks.clear();
-  }
-
-  @SuppressWarnings("deprecation")
-  public void lock(LWC lwc, String playerName) {
-    this.lwc = lwc;
-    lwc.getPhysicalDatabase()
-        .registerProtection(
-            chest.getTypeId(),
-            config.isLWCPrivateDefault() ? Protection.Type.PRIVATE : Protection.Type.PUBLIC,
-            chest.getWorld().getName(),
-            playerName,
-            "",
-            chest.getX(),
-            chest.getY(),
-            chest.getZ());
   }
 
   public void scheduleRemoval(Scheduler scheduler, long delay) {
@@ -175,11 +157,10 @@ public class DeathChest {
     removeAll();
   }
 
-  private Inventory[] getInventories() {
-    if (secondChest != null) {
-      return new Inventory[] {getChestInventory(chest), getChestInventory(secondChest)};
-    }
-    return new Inventory[] {getChestInventory(chest)};
+  private List<Inventory> getInventories() {
+    return chestBlocks.stream()
+        .map(DeathChest::getChestInventory)
+        .collect(Collectors.toList());
   }
 
   private static Inventory getChestInventory(Block chestBlock) {

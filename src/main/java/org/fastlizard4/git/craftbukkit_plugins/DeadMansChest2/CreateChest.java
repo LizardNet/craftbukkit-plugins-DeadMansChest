@@ -39,126 +39,108 @@
 
 package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
+import com.google.common.collect.ImmutableList;
 import com.griefcraft.lwc.LWC;
+import com.griefcraft.model.Protection;
+import java.util.List;
 import javax.annotation.Nullable;
-import org.bukkit.Location;
+import javax.annotation.ParametersAreNonnullByDefault;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
+@ParametersAreNonnullByDefault
 public class CreateChest implements Runnable {
+  private static final int MAX_OFFSET = 8;
+  private static final BlockFace[] HORIZONTALLY_ADJACENT = {
+      BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH
+  };
+
   private final Config config;
   @Nullable private final LWC lwc;
   private final Persistence persistence;
   private final Scheduler scheduler;
-
-  private final Block chestblock;
   private final Player player;
-  private final DeathChest deathChest;
+  private final List<ItemStack> drops;
+
+  /**
+   * List of blocks to be replaced with chests.
+   * Initialized by methods called in constructor, effectively final.
+   */
+  private List<Block> chestBlocks;
+  /**
+   * Block to be replaced with a sign. Null if no sign is to be placed.
+   * Initialized by methods called in constructor, effectively final.
+   */
+  private Block signBlock;
+  /**
+   * Direction the death chest sign will be facing. Null if the sign to be placed is a signpost.
+   * Initialized by methods called in constructor, effectively final.
+   */
+  @Nullable private BlockFace signFacing;
+  /**
+   * DeathChest persistence instance.
+   * Initialized in the constructor, effectively final.
+   */
+  private DeathChest deathChest;
 
   public CreateChest(
       Config config,
       @Nullable LWC lwc,
       Persistence persistence,
       Scheduler scheduler,
-      Block chestblock,
       Player player,
-      DeathChest deathChest) {
+      List<ItemStack> drops,
+      int chestsToDeploy) throws Exception {
     this.config = config;
     this.lwc = lwc;
     this.persistence = persistence;
     this.scheduler = scheduler;
-    this.chestblock = chestblock;
     this.player = player;
-    this.deathChest = deathChest;
+    this.drops = ImmutableList.copyOf(drops);
+
+    findBlocksForChest(player.getLocation().getBlock(), chestsToDeploy > 1);
+
+    deathChest = new DeathChest(lwc, persistence, chestBlocks, drops);
   }
 
   @Override
   public void run() {
-    if (lwc != null && player.hasPermission("DeadMansChest2.lock")) {
-      deathChest.lock(lwc, player.getName());
-    }
+    tryLock();
 
-    if (this.config.isSignOnChest()) {
-      boolean foundair = false;
-      BlockFace[] directions = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
-      int signdirection = 1;
-      for (int i = 0; i < directions.length && !foundair; i++) {
-        if (config.isBeaconReplacesLiquid()) {
-          // If we can replace water, let's do it with the sign too!
-          Block tempblock = chestblock.getRelative(directions[i]);
-          if (tempblock.getType() == Material.AIR
-              || tempblock.getType() == Material.WATER
-              || tempblock.getType() == Material.STATIONARY_WATER
-              || tempblock.getType() == Material.LAVA
-              || tempblock.getType() == Material.STATIONARY_LAVA) {
-            signdirection = i;
-            foundair = true;
-          }
+    if (config.isSignOnChest()) {
+      findBlockForSign();
+
+      if (signBlock != null) {
+        Sign sign;
+        if (signFacing != null) {
+          deathChest.setBlock(signBlock, Material.WALL_SIGN);
+          sign = (Sign) signBlock.getState();
+          org.bukkit.material.Sign matSign = new org.bukkit.material.Sign(Material.WALL_SIGN);
+          matSign.setFacingDirection(signFacing);
+          sign.setData(matSign);
         } else {
-          if (chestblock.getRelative(directions[i]).getType() == Material.AIR) {
-            signdirection = i;
-            foundair = true;
-          }
+          deathChest.setBlock(signBlock, Material.SIGN_POST);
+          sign = (Sign) signBlock.getState();
         }
-      }
-
-      if (foundair) {
-        // -----------------------------------------------------------
-        Block signBlock = chestblock.getRelative(directions[signdirection]);
-        deathChest.setBlock(signBlock, Material.WALL_SIGN);
-        Sign sign = (Sign) signBlock.getState();
-        org.bukkit.material.Sign matSign = new org.bukkit.material.Sign(Material.WALL_SIGN);
-        matSign.setFacingDirection(directions[signdirection]);
-        sign.setData(matSign);
-        // -----------------------------------------------------------
-
         sign.setLine(0, player.getDisplayName() + "'s");
         sign.setLine(1, "Deathpile");
         sign.update();
-      } else {
-        // If we didn't find a free spot, let's put the sign above the chest...
-        // Will probably look very ugly though and pop off anyways...
-        // -----------------------------------------------------------
-        Block signBlock = chestblock.getRelative(BlockFace.UP);
-        // Let's make sure we aren't overwriting a block here
-        if (Constants.AIR_BLOCKS.contains(signBlock.getType())) {
-          deathChest.setBlock(signBlock, Material.SIGN_POST);
-          Sign sign = (Sign) signBlock.getState();
-          // -----------------------------------------------------------
-
-          sign.setLine(0, player.getDisplayName() + "'s");
-          sign.setLine(1, "Deathpile");
-          sign.update();
-          // plugin.signblocks.put(chestblock, signBlock);
-        }
       }
     }
 
     if (config.isBeaconEnabled() && player.hasPermission("DeadMansChest2.beacon")) {
       int height = config.getBeaconHeight();
-      Location chestLocation1 = chestblock.getLocation();
-
-      Location firstlocation = chestLocation1.add(0.0, 2.0, 0.0);
-      Block nextblock = firstlocation.getBlock();
+      Block nextBlock = chestBlocks.get(0).getRelative(0, 2, 0);
 
       for (int i = 0; i < height; i++) {
-        if (config.isBeaconReplacesLiquid()) {
-          if (nextblock.getType() == Material.AIR
-              || nextblock.getType() == Material.WATER
-              || nextblock.getType() == Material.STATIONARY_WATER
-              || nextblock.getType() == Material.LAVA
-              || nextblock.getType() == Material.STATIONARY_LAVA) {
-            deathChest.setBlock(nextblock, Material.GLOWSTONE);
-          }
-        } else {
-          if (nextblock.getType() == Material.AIR) {
-            deathChest.setBlock(nextblock, Material.GLOWSTONE);
-          }
+        if (canReplaceBlock(nextBlock)) {
+          deathChest.setBlock(nextBlock, Material.GLOWSTONE);
         }
-        nextblock = nextblock.getRelative(BlockFace.UP);
+        nextBlock = nextBlock.getRelative(BlockFace.UP);
       }
     }
 
@@ -168,5 +150,83 @@ public class CreateChest implements Runnable {
       int delay = config.getChestDeleteInterval() * 20;
       deathChest.scheduleRemoval(scheduler, delay);
     }
+  }
+
+  private void tryLock() {
+    if (lwc != null && player.hasPermission("DeadMansChest2.lock")) {
+      Block chest = chestBlocks.get(0);
+      lwc.getPhysicalDatabase().registerProtection(
+          chest.getTypeId(),
+          config.isLWCPrivateDefault() ? Protection.Type.PRIVATE : Protection.Type.PUBLIC,
+          chest.getWorld().getName(),
+          player.getName(),
+          "",
+          chest.getX(),
+          chest.getY(),
+          chest.getZ());
+    }
+  }
+
+  private void findBlocksForChest(Block searchStart, boolean needAdjacent) throws Exception {
+    for (int totalOffset = 0; totalOffset <= MAX_OFFSET; totalOffset++) {
+      for (int xOffset = -totalOffset; xOffset <= totalOffset; xOffset++) {
+        int remainingOffset = xOffset < 0 ? totalOffset + xOffset : totalOffset - xOffset;
+        for (int zOffset = -remainingOffset; zOffset <= remainingOffset; zOffset++) {
+          int yOffset = zOffset < 0 ? remainingOffset + zOffset : remainingOffset - zOffset;
+
+          Block cursor = searchStart.getRelative(xOffset, yOffset, zOffset);
+          if (!canPlaceChest(cursor)) {
+            continue;
+          }
+          if (!needAdjacent) {
+            chestBlocks = ImmutableList.of(cursor);
+            return;
+          }
+          for (BlockFace direction : HORIZONTALLY_ADJACENT) {
+            Block adjacent = cursor.getRelative(direction);
+            if (canPlaceChest(adjacent)) {
+              chestBlocks = ImmutableList.of(cursor, adjacent);
+              return;
+            }
+          }
+        }
+      }
+    }
+    throw new Exception("Unable to place chest; no open blocks");
+  }
+
+  /**
+   * Finds a valid block to place a sign and saves it in {@link #signBlock} and {@link #signFacing}.
+   */
+  private void findBlockForSign() {
+    for (Block chestBlock : chestBlocks) {
+      for (BlockFace direction : HORIZONTALLY_ADJACENT) {
+        Block adjacent = chestBlock.getRelative(direction);
+        if (canReplaceBlock(adjacent) && !chestBlocks.contains(adjacent)) {
+          signBlock = adjacent;
+          signFacing = direction;
+          return;
+        }
+      }
+    }
+    for (Block chestBlock : chestBlocks) {
+      Block above = chestBlock.getRelative(BlockFace.UP);
+      if (canReplaceBlock(above)) {
+        signBlock = above;
+        return;
+      }
+    }
+  }
+
+  private boolean canPlaceChest(Block target) {
+    return canReplaceBlock(target)
+        && target.getRelative(BlockFace.UP).getType().isTransparent();
+  }
+
+  private boolean canReplaceBlock(Block target) {
+    if (config.isBeaconReplacesLiquid()) {
+      return Constants.MATERIALS_REPLACEABLE.contains(target.getType());
+    }
+    return target.getType() == Material.AIR;
   }
 }

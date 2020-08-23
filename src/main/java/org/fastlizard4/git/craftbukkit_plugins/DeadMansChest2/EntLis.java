@@ -42,12 +42,12 @@ package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 import com.griefcraft.lwc.LWC;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -57,11 +57,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class EntLis implements Listener {
-  private static final int MAX_ITEMS_PER_CHEST = 27;
-  private static final int MAX_OFFSET = 8;
-  private static final BlockFace[] HORIZONTALLY_ADJACENT = {
-    BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH
-  };
+  private static final Logger log = Logger.getLogger("Minecraft");
 
   private final Server server;
   private final Config config;
@@ -83,7 +79,7 @@ public class EntLis implements Listener {
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
-  public void onEntityDeath(EntityDeathEvent event) {
+  public void onEntityDeath(EntityDeathEvent event) throws Exception {
     Entity entity = event.getEntity();
     if (!(entity instanceof Player)) {
       return;
@@ -108,13 +104,13 @@ public class EntLis implements Listener {
       chestsToDeploy = 1;
       int tentativeItemCount = countStacks(drops, 1);
       if (chestCount > 1
-          && tentativeItemCount > MAX_ITEMS_PER_CHEST
+          && tentativeItemCount > Constants.MAX_ITEMS_PER_CHEST
           && player.hasPermission("DeadMansChest2.doublechest")) {
         chestsToDeploy = 2;
       }
       removeChests(drops, chestsToDeploy);
     } else {
-      if (countStacks(drops, 0) > MAX_ITEMS_PER_CHEST
+      if (countStacks(drops, 0) > Constants.MAX_ITEMS_PER_CHEST
           && player.hasPermission("DeadMansChest2.doublechest")) {
         chestsToDeploy = 2;
       } else {
@@ -122,68 +118,37 @@ public class EntLis implements Listener {
       }
     }
 
-    Block[] blocks = findOpenBlocks(player.getLocation().getBlock(), chestsToDeploy > 1);
-    if (blocks == null) {
-      return;
-    }
-    Block block = blocks[0];
-    Block block2 = blocks.length > 1 ? blocks[1] : null;
+    try {
+      CreateChest creator = new CreateChest(config, lwc, persistence, scheduler, player, drops,
+          chestsToDeploy);
 
-    DeathChest deathChest = new DeathChest(config, persistence, block, block2, drops);
-
-    if (!config.isDropsEnabled() && !player.hasPermission("DeadMansChest2.drops")) {
-      drops.clear();
-    }
-
-    if (config.isDeathMessage() && player.hasPermission("DeadMansChest2.message")) {
-      String positionString = block.getX() + ", " + block.getY() + ", " + block.getZ();
-      String deathMessageString =
-          config
-              .getDeathMessageString()
-              .replaceAll("\\{position}", positionString)
-              .replaceAll("\\{player}", player.getDisplayName());
-      for (ChatColor c : ChatColor.values()) {
-        if (c.isColor()) {
-          deathMessageString = deathMessageString.replaceAll("\\{" + c.name() + "}", c.toString());
-        }
+      if (!config.isDropsEnabled() && !player.hasPermission("DeadMansChest2.drops")) {
+        drops.clear();
       }
-      this.server.broadcastMessage(deathMessageString);
-    }
 
-    scheduler.schedule(new CreateChest(config, lwc, persistence, scheduler, block, player, deathChest), 1);
-  }
-
-  @Nullable
-  private Block[] findOpenBlocks(Block searchStart, boolean needAdjacent) {
-    for (int totalOffset = 0; totalOffset <= MAX_OFFSET; totalOffset++) {
-      for (int xOffset = -totalOffset; xOffset <= totalOffset; xOffset++) {
-        int remainingOffset = xOffset < 0 ? totalOffset + xOffset : totalOffset - xOffset;
-        for (int zOffset = -remainingOffset; zOffset <= remainingOffset; zOffset++) {
-          int yOffset = zOffset < 0 ? remainingOffset + zOffset : remainingOffset - zOffset;
-
-          Block cursor = searchStart.getRelative(xOffset, yOffset, zOffset);
-          if (!canPlaceChest(cursor)) {
-            continue;
-          }
-          if (!needAdjacent) {
-            return new Block[] {cursor};
-          }
-          for (BlockFace direction : HORIZONTALLY_ADJACENT) {
-            Block adjacent = cursor.getRelative(direction);
-            if (canPlaceChest(adjacent)) {
-              return new Block[] {cursor, adjacent};
-            }
+      if (config.isDeathMessage() && player.hasPermission("DeadMansChest2.message")) {
+        Block block = player.getLocation().getBlock();
+        String positionString = block.getX() + ", " + block.getY() + ", " + block.getZ();
+        String deathMessageString =
+            config
+                .getDeathMessageString()
+                .replaceAll("\\{position}", positionString)
+                .replaceAll("\\{player}", player.getDisplayName());
+        for (ChatColor c : ChatColor.values()) {
+          if (c.isColor()) {
+            deathMessageString = deathMessageString
+                .replaceAll("\\{" + c.name() + "}", c.toString());
           }
         }
+        this.server.broadcastMessage(deathMessageString);
       }
-    }
-    return null;
-  }
 
-  private boolean canPlaceChest(Block target) {
-    Block above = target.getRelative(BlockFace.UP);
-    return Constants.AIR_BLOCKS.contains(target.getType())
-        && Constants.AIR_BLOCKS.contains(above.getType());
+      scheduler.schedule(creator, 1);
+    } catch (Exception e) {
+      this.server.broadcastMessage(ChatColor.BOLD + "" + ChatColor.YELLOW +
+          "Failed to deploy death chest for " + player.getDisplayName() + "!");
+      throw e;
+    }
   }
 
   private boolean isEmpty(List<ItemStack> items) {

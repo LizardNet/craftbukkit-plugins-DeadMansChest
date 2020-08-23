@@ -46,7 +46,7 @@ import org.bukkit.Material;
 public final class Constants {
   public static final String VERSION = "0.8";
   public static final String PLUGIN_DATA_DIRECTORY = "plugins/DeadMansChest2/";
-  public static final Set<Material> AIR_BLOCKS =
+  public static final Set<Material> MATERIALS_REPLACEABLE =
       ImmutableSet.of(
           Material.AIR,
           Material.LONG_GRASS,
@@ -57,6 +57,7 @@ public final class Constants {
           Material.STATIONARY_WATER,
           Material.LAVA,
           Material.STATIONARY_LAVA);
+  public static final int MAX_ITEMS_PER_CHEST = 27;
 
   private Constants() {
     throw new IllegalStateException();
