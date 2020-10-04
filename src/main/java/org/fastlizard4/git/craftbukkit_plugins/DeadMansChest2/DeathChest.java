@@ -102,8 +102,16 @@ public class DeathChest {
     return Collections.unmodifiableSet(replacedBlocks.keySet());
   }
 
+  public boolean containsBlock(Block b) {
+    return replacedBlocks.containsKey(b);
+  }
+
   public List<Block> getLootableBlocks() {
     return Collections.unmodifiableList(chestBlocks);
+  }
+
+  public boolean containsLootableBlock(Block b) {
+    return chestBlocks.contains(b);
   }
 
   public void setBlock(Block block, Material material) {

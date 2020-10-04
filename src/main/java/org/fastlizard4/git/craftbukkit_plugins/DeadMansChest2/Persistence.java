@@ -41,7 +41,6 @@ package org.fastlizard4.git.craftbukkit_plugins.DeadMansChest2;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.block.Block;
@@ -51,17 +50,6 @@ public class Persistence {
    * Authoritative set of death chests. This is a prime target for storing to disk or to a database.
    */
   private final Set<DeathChest> deathChests = Collections.newSetFromMap(new ConcurrentHashMap<>());
-
-  /**
-   * Convenience mapping to look up which death chest is associated with a given block.
-   */
-  private final Map<Block, DeathChest> deathChestsByBlock = new ConcurrentHashMap<>();
-
-  /**
-   * Convenience mapping to look up which death chest is associated with a given block, containing
-   * only those blocks which can be clicked to loot the death chest.
-   */
-  private final Map<Block, DeathChest> deathChestsByLootableBlock = new ConcurrentHashMap<>();
 
   /**
    * Creates a new instance with no registered death chests.
@@ -82,33 +70,32 @@ public class Persistence {
    */
   public void registerDeathChest(DeathChest chest) {
     deathChests.add(chest);
-    chest.getBlocks().forEach(block -> deathChestsByBlock.put(block, chest));
-    chest.getLootableBlocks().forEach(block -> deathChestsByLootableBlock.put(block, chest));
   }
 
   public void unregisterDeathChest(DeathChest chest) {
     deathChests.remove(chest);
-    chest.getBlocks().forEach(deathChestsByBlock::remove);
-    chest.getLootableBlocks().forEach(deathChestsByLootableBlock::remove);
   }
 
   public boolean isFakeBlock(Block block) {
-    return deathChestsByBlock.containsKey(block);
+    return deathChests.stream()
+        .anyMatch(deathChest -> deathChest.containsBlock(block));
   }
 
   public void removeAndUnregisterFakeBlock(Block block) {
-    DeathChest chest = deathChestsByBlock.get(block);
-    if (chest != null) {
-      chest.removeBlock(block);
-    }
-    deathChestsByBlock.remove(block);
+    deathChests.stream()
+        .filter(deathChest -> deathChest.containsBlock(block))
+        .forEach(deathChest -> deathChest.removeBlock(block));
   }
 
   public boolean isLootableBlock(Block block) {
-    return deathChestsByLootableBlock.containsKey(block);
+    return deathChests.stream()
+        .anyMatch(deathChest -> deathChest.containsLootableBlock(block));
   }
 
   public DeathChest getDeathChestByLootableBlock(Block block) {
-    return deathChestsByLootableBlock.get(block);
+    return deathChests.stream()
+        .filter(deathChest -> deathChest.containsLootableBlock(block))
+        .findAny()
+        .orElse(null);
   }
 }
