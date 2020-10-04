@@ -53,6 +53,7 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Sign;
 
@@ -137,6 +138,14 @@ public class CdBlockListener implements Listener {
         event.setCancelled(true);
       }
     }
+  }
+
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onEntityExplode(EntityExplodeEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
+    event.blockList().removeIf(persistence::isFakeBlock);
   }
 
   private boolean isUnsupportedSign(Block block) {
