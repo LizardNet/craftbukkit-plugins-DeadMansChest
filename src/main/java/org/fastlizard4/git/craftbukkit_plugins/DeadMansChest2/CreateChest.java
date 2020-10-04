@@ -64,28 +64,24 @@ public class CreateChest implements Runnable {
   private final Persistence persistence;
   private final Scheduler scheduler;
   private final Player player;
-  private final List<ItemStack> drops;
 
   /**
    * List of blocks to be replaced with chests.
-   * Initialized by methods called in constructor, effectively final.
    */
-  private List<Block> chestBlocks;
+  private final List<Block> chestBlocks;
+  /**
+   * DeathChest persistence instance.
+   */
+  private final DeathChest deathChest;
+
   /**
    * Block to be replaced with a sign. Null if no sign is to be placed.
-   * Initialized by methods called in constructor, effectively final.
    */
   private Block signBlock;
   /**
    * Direction the death chest sign will be facing. Null if the sign to be placed is a signpost.
-   * Initialized by methods called in constructor, effectively final.
    */
   @Nullable private BlockFace signFacing;
-  /**
-   * DeathChest persistence instance.
-   * Initialized in the constructor, effectively final.
-   */
-  private DeathChest deathChest;
 
   public CreateChest(
       Config config,
@@ -100,9 +96,8 @@ public class CreateChest implements Runnable {
     this.persistence = persistence;
     this.scheduler = scheduler;
     this.player = player;
-    this.drops = ImmutableList.copyOf(drops);
 
-    findBlocksForChest(player.getLocation().getBlock(), chestsToDeploy > 1);
+    chestBlocks = findBlocksForChest(player.getLocation().getBlock(), chestsToDeploy > 1);
 
     deathChest = new DeathChest(lwc, persistence, chestBlocks, drops);
   }
@@ -167,7 +162,7 @@ public class CreateChest implements Runnable {
     }
   }
 
-  private void findBlocksForChest(Block searchStart, boolean needAdjacent) throws Exception {
+  private List<Block> findBlocksForChest(Block searchStart, boolean needAdjacent) throws Exception {
     for (int totalOffset = 0; totalOffset <= MAX_OFFSET; totalOffset++) {
       for (int xOffset = -totalOffset; xOffset <= totalOffset; xOffset++) {
         int remainingOffset = xOffset < 0 ? totalOffset + xOffset : totalOffset - xOffset;
@@ -179,14 +174,12 @@ public class CreateChest implements Runnable {
             continue;
           }
           if (!needAdjacent) {
-            chestBlocks = ImmutableList.of(cursor);
-            return;
+            return ImmutableList.of(cursor);
           }
           for (BlockFace direction : HORIZONTALLY_ADJACENT) {
             Block adjacent = cursor.getRelative(direction);
             if (canPlaceChest(adjacent)) {
-              chestBlocks = ImmutableList.of(cursor, adjacent);
-              return;
+              return ImmutableList.of(cursor, adjacent);
             }
           }
         }
