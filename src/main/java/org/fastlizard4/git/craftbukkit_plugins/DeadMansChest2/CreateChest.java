@@ -100,6 +100,8 @@ public class CreateChest implements Runnable {
     chestBlocks = findBlocksForChest(player.getLocation().getBlock(), chestsToDeploy > 1);
 
     deathChest = new DeathChest(lwc, persistence, chestBlocks, drops);
+
+    persistence.registerDeathChest(deathChest);
   }
 
   @Override
@@ -138,8 +140,6 @@ public class CreateChest implements Runnable {
         nextBlock = nextBlock.getRelative(BlockFace.UP);
       }
     }
-
-    persistence.registerDeathChest(deathChest);
 
     if (config.isChestDeleteIntervalEnabled() && !player.hasPermission("DeadMansChest2.nodelete")) {
       int delay = config.getChestDeleteInterval() * 20;
