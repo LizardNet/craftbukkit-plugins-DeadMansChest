@@ -54,7 +54,7 @@ import org.bukkit.inventory.ItemStack;
 
 @ParametersAreNonnullByDefault
 public class CreateChest implements Runnable {
-  private static final int MAX_OFFSET = 8;
+  private static final int MAX_OFFSET = 32;
   private static final BlockFace[] HORIZONTALLY_ADJACENT = {
       BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH
   };
